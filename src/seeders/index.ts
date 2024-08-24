@@ -1,4 +1,3 @@
-import inquirer from 'inquirer';
 import sequelize from "@/models";
 import {number, select} from "@inquirer/prompts";
 
