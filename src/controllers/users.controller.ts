@@ -3,6 +3,7 @@ import { Container } from 'typedi';
 import { User } from '@/interfaces/users.interface';
 import { UserService } from '@/services/users.service';
 import { DataTable, FindAllPaginateOptions } from '@/interfaces/datatable.interface';
+import { TSortType } from '@/interfaces/global.interface';
 
 export class UserController {
   public user = Container.get(UserService);
@@ -10,6 +11,7 @@ export class UserController {
   public getUsers = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { pageNumber = 1, perPage = 10, sort = 'createdAt', order = 'ASC', ...filters } = req.query;
+
       const options: FindAllPaginateOptions = {
         pageNumber: Number(pageNumber),
         perPage: Number(perPage),
@@ -17,7 +19,7 @@ export class UserController {
         q: req.query.q as string,
         ignoreGlobal: (req.query.ignoreGlobal as string)?.split(',') || [],
         sort: String(sort),
-        order: String(order).toUpperCase() as 'ASC' | 'DESC',
+        order: String(order).toUpperCase() as TSortType,
       };
       const findAllUsersData: DataTable<User> = await this.user.findAllPaginate(options);
 

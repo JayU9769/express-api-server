@@ -4,7 +4,6 @@ import { Model, ModelCtor } from 'sequelize-typescript';
 
 export class BaseService<T extends Model> {
   constructor(protected model: ModelCtor<T>) {}
-
   public async findAllPaginate({
     pageNumber = 1,
     perPage = 10,
