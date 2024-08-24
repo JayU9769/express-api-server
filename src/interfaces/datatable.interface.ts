@@ -1,3 +1,5 @@
+import { TSortType } from './global.interface';
+
 export interface DataTable<T> {
   count: number;
   rows: T[];
@@ -10,5 +12,5 @@ export interface FindAllPaginateOptions {
   q?: string;
   ignoreGlobal?: string[];
   sort?: string;
-  order?: 'ASC' | 'DESC';
+  order?: TSortType;
 }
