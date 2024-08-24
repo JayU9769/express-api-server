@@ -1,14 +1,13 @@
-import { hash } from 'bcrypt';
-import { Service } from 'typedi';
-import { User } from '@/interfaces/users.interface';
-import { HttpException } from '@/exceptions/HttpException';
-import { User as UserModel } from '@/models/users.model';
+import {hash} from 'bcrypt';
+import {Service} from 'typedi';
+import {User} from '@/interfaces/users.interface';
+import {HttpException} from '@/exceptions/HttpException';
+import {User as UserModel} from '@/models/users.model';
 
 @Service()
 export class UserService {
   public async findAllUser(): Promise<User[]> {
-    const users: User[] = await UserModel.findAll();
-    return users;
+    return await UserModel.findAll();
   }
 
   public async findUserById(userId: string): Promise<User> {
@@ -23,9 +22,7 @@ export class UserService {
     if (findUser) throw new HttpException(409, `This email ${userData.email} already exists`);
 
     const hashedPassword = await hash(userData.password, 10);
-    const createUserData: User = await UserModel.create({ ...userData, password: hashedPassword });
-
-    return createUserData;
+    return await UserModel.create({...userData, password: hashedPassword});
   }
 
   public async updateUser(userId: Number, userData: User): Promise<User> {
