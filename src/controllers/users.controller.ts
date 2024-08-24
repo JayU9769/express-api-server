@@ -3,6 +3,7 @@ import { Container } from 'typedi';
 import { User } from '@/interfaces/users.interface';
 import { UserService } from '@/services/users.service';
 import { DataTable } from '@/interfaces/datatable.interface';
+import {TSortType} from "@/interfaces/global.interface";
 
 export class UserController {
   public user = Container.get(UserService);
@@ -16,7 +17,7 @@ export class UserController {
         Number(perPage),
         filters,
         String(sort),
-        String(order).toUpperCase() as 'ASC' | 'DESC',
+        String(order).toUpperCase() as TSortType,
       );
 
       res.status(200).json({ data: findAllUsersData, message: 'findAll' });

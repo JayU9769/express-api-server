@@ -1,4 +1,5 @@
 import { FindAndCountOptions, Model, ModelCtor } from 'sequelize';
+import {TSortType} from "@/interfaces/global.interface";
 
 export interface DataTable<T> {
   count: number;
@@ -13,7 +14,7 @@ export class BaseService<T extends Model> {
     perPage: number = 10,
     filters: any = {},
     sort: string = 'createdAt',
-    order: 'ASC' | 'DESC' = 'ASC',
+    order: TSortType = 'ASC',
   ): Promise<DataTable<T>> {
     const offset = (pageNumber - 1) * perPage;
 
