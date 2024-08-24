@@ -2,13 +2,22 @@ import { NextFunction, Request, Response } from 'express';
 import { Container } from 'typedi';
 import { User } from '@/interfaces/users.interface';
 import { UserService } from '@/services/users.service';
+import { DataTable } from '@/interfaces/datatable.interface';
 
 export class UserController {
   public user = Container.get(UserService);
 
   public getUsers = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const findAllUsersData: User[] = await this.user.findAllUser();
+      const { pageNumber = 1, perPage = 10, sort = 'createdAt', order = 'ASC', ...filters } = req.query;
+
+      const findAllUsersData: DataTable<User> = await this.user.findAllPaginate(
+        Number(pageNumber),
+        Number(perPage),
+        filters,
+        String(sort),
+        String(order).toUpperCase() as 'ASC' | 'DESC',
+      );
 
       res.status(200).json({ data: findAllUsersData, message: 'findAll' });
     } catch (error) {

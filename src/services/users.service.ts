@@ -1,16 +1,17 @@
 import { hash } from 'bcrypt';
+import { FindAndCountOptions } from 'sequelize';
 import { Service } from 'typedi';
 import { User } from '@/interfaces/users.interface';
 import { HttpException } from '@/exceptions/HttpException';
 import { User as UserModel } from '@/models/users.model';
+import { DataTable } from '@/interfaces/datatable.interface';
+import { BaseService } from './base/base.service';
 
 @Service()
-export class UserService {
-  public async findAllUser(): Promise<User[]> {
-    const users: User[] = await UserModel.findAll();
-    return users;
+export class UserService extends BaseService<UserModel> {
+  constructor() {
+    super(UserModel);
   }
-
   public async findUserById(userId: string): Promise<User> {
     const findUser: User = await UserModel.findByPk(userId);
     if (!findUser) throw new HttpException(409, "User doesn't exist");
@@ -39,7 +40,7 @@ export class UserService {
       userData = { ...userData, password: hashedPassword };
     }
 
-    await UserModel.update({ ...userData }, {where: {id: userId}});
+    await UserModel.update({ ...userData }, { where: { id: userId } });
 
     const updateUserById: User = await UserModel.findOne({ where: { email: userData.email } });
     if (!updateUserById) throw new HttpException(409, "User doesn't exist");
@@ -48,7 +49,7 @@ export class UserService {
   }
 
   public async deleteUser(userId: string): Promise<boolean> {
-    const deleteUserById = await UserModel.destroy({where: {id: userId}});
+    const deleteUserById = await UserModel.destroy({ where: { id: userId } });
     if (!deleteUserById) throw new HttpException(409, "User doesn't exist");
 
     return true;
