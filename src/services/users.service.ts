@@ -1,10 +1,8 @@
 import { hash } from 'bcrypt';
-import { FindAndCountOptions } from 'sequelize';
 import { Service } from 'typedi';
 import { User } from '@/interfaces/users.interface';
 import { HttpException } from '@/exceptions/HttpException';
 import { User as UserModel } from '@/models/user.model';
-import { DataTable } from '@/interfaces/datatable.interface';
 import { BaseService } from './base/base.service';
 
 @Service()
