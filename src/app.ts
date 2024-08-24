@@ -28,7 +28,6 @@ export class App {
   }
 
   public async listen() {
-
     await this.initializeDatabaseConnection()
     this.app.listen(this.port, () => {
       console.info(`=================================`);
