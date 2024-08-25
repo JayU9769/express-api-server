@@ -10,10 +10,10 @@ export class UserController {
 
   public getUsers = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { pageNumber = 1, perPage = 10, sort = 'createdAt', order = 'ASC', ...filters } = req.query;
+      const { pageNumber = 0, perPage = 10, sort = 'createdAt', order = 'ASC', ...filters } = req.query;
 
       const options: FindAllPaginateOptions = {
-        pageNumber: Number(pageNumber),
+        pageNumber: Number(pageNumber) + 1,
         perPage: Number(perPage),
         filters: filters,
         q: req.query.q as string,
