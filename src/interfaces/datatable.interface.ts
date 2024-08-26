@@ -1,3 +1,4 @@
+import { Includeable } from 'sequelize';
 import { TSortType } from './global.interface';
 
 export interface DataTable<T> {
@@ -13,4 +14,5 @@ export interface FindAllPaginateOptions {
   ignoreGlobal?: string[];
   sort?: string;
   order?: TSortType;
+  include?: Includeable[];
 }

@@ -12,6 +12,7 @@ export class BaseService<T extends Model> {
     ignoreGlobal = [],
     sort = 'createdAt',
     order = 'ASC',
+    include = [],
   }: FindAllPaginateOptions = {}): Promise<DataTable<T>> {
     const offset = (pageNumber - 1) * perPage;
 
@@ -32,6 +33,7 @@ export class BaseService<T extends Model> {
       limit: perPage,
       offset: offset,
       order: [[sort, order]],
+      include,
     };
 
     const result = await this.model.findAndCountAll(options);
