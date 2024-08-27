@@ -48,7 +48,7 @@ export class BaseService<T extends Model> {
 
     // Add filters to where clause
     Object.keys(filters).forEach(key => {
-      if (filters[key] !== undefined) {
+      if (filters[key] !== undefined && key !== 'q') {
         // Apply LIKE operator for string filters, otherwise use equality
         if (typeof filters[key] === 'string') {
           whereClause[key] = {
@@ -62,20 +62,23 @@ export class BaseService<T extends Model> {
 
     // Add global search if `q` is provided
     if (q) {
-      const globalSearchConditions: Record<string, any> = {};
+      const globalSearchConditions: Array<Record<string, any>> = [];
       const attributes = this.model.getAttributes();
 
-      for (const [key, value] of Object.entries(attributes)) {
+      // Iterate over the model's attributes (columns)
+      for (const key of Object.keys(attributes)) {
         if (!ignoreGlobal.includes(key)) {
-          globalSearchConditions[key] = {
-            [Op.iLike]: `%${q}%`,
-          };
+          globalSearchConditions.push({
+            [key]: {
+              [Op.like]: `%${q}%`, // Use LIKE operator for partial matches
+            },
+          });
         }
       }
 
-      whereClause[Op.or as unknown as keyof typeof Op] = Object.entries(globalSearchConditions).map(([key, condition]) => ({
-        [key]: condition,
-      }));
+      if (globalSearchConditions.length > 0) {
+        whereClause[Op.or as unknown as keyof typeof Op] = globalSearchConditions;
+      }
     }
 
     return whereClause;
