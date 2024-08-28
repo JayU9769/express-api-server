@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsString, IsNotEmpty, IsArray, IsNumber, IsObject, ValidateNested } from 'class-validator';
+import { IsString, IsNotEmpty, IsArray, IsObject, ValidateNested } from 'class-validator';
 
 class UpdateFieldDto {
   @IsString()
@@ -12,9 +12,9 @@ class UpdateFieldDto {
 
 export class UpdateActionDto {
   @IsArray()
-  @IsNumber({}, { each: true })
   @IsNotEmpty({ each: true })
-  public ids: number[];
+  @IsString({ each: true })
+  public ids: Array<string | number>;
 
   @IsObject()
   @ValidateNested()

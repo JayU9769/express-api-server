@@ -122,12 +122,17 @@ export class BaseService<T extends Model> {
 
     // Define the options for the update, including the where clause
     const options: UpdateOptions = {
-      where: {
-        id: {
-          [Op.in]: ids, // Ensure the update applies to records with IDs in the provided list
-        },
-      },
+      where: {},
     };
+
+    // Handle the "all" case or specific IDs
+    if (!ids.includes('all')) {
+      options.where = {
+        id: {
+          [Op.in]: ids, // Apply the update to records with IDs in the provided list
+        },
+      };
+    }
 
     // Perform the update operation and get the count of affected rows
     const [affectedRows] = await this.model.update(updateData, options);
