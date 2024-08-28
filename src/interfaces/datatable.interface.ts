@@ -1,15 +1,15 @@
 import { Includeable } from 'sequelize';
-import { TSortType } from './global.interface';
+import { TRecord, TSortType } from './global.interface';
 
-export interface DataTable<T> {
+export interface IDataTable<T> {
   count: number;
   rows: T[];
 }
 
-export interface FindAllPaginateOptions {
+export interface IFindAllPaginateOptions {
   pageNumber?: number;
   perPage?: number;
-  filters?: Record<string, any>;
+  filters?: TRecord;
   q?: string;
   ignoreGlobal?: string[];
   sort?: string;
