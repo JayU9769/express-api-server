@@ -8,7 +8,8 @@ const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.p
   database: dbConfig.database,
   host: dbConfig.host,
   port: Number(dbConfig.port) || 3306,
-  models: [User]
+  models: [User],
+  logging: false
 });
 
 export default sequelize;
