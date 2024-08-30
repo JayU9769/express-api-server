@@ -78,7 +78,7 @@ export class UserController {
     try {
       const userData: User = req.body;
       // Create new user
-      const createUserData: User = await this.user.createUser(userData);
+      const createUserData: User = await this.user.createUser({ ...userData });
 
       // Respond with the created user data
       res.status(201).json({ data: createUserData, message: 'created' });
