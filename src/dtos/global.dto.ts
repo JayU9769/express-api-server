@@ -21,3 +21,10 @@ export class UpdateActionDto {
   @Type(() => UpdateFieldDto)
   public field: UpdateFieldDto;
 }
+
+export class DeleteActionDto {
+  @IsArray()
+  @IsNotEmpty({ each: true })
+  public ids: Array<string | number>;
+}
+

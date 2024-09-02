@@ -119,9 +119,9 @@ export class UserController {
    */
   public deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId: string = req.params.id;
+      const userIds: string[] = req.body.ids;
       // Delete user by ID
-      await this.user.deleteUser(userId);
+      await this.user.deleteUser(userIds);
 
       // Respond with success message
       res.status(200).json({ message: 'deleted' });
