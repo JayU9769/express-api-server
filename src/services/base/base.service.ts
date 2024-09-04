@@ -1,22 +1,47 @@
 import { IDataTable, IFindAllPaginateOptions } from '@/interfaces/datatable.interface';
 import { IUpdateAction, TRecord } from '@/interfaces/global.interface';
-import { FindOptions, CountOptions, Op, UpdateOptions } from 'sequelize';
-import { Model, ModelCtor } from 'sequelize-typescript';
+import { PrismaClient, Prisma } from '@prisma/client';
 
-/**
- * BaseService provides generic data access functionality for Sequelize models,
- * including support for pagination, filtering, sorting, and global search.
- * @template T The model type that extends Sequelize's Model class.
- */
-export class BaseService<T extends Model> {
-  constructor(protected model: ModelCtor<T>) {}
+export abstract class BaseService<T extends object> {
+  protected readonly prisma: PrismaClient;
 
-  /**
-   * Retrieves a paginated list of records from the database based on provided options.
-   * Supports filtering, sorting, and global search.
-   * @param options Pagination and filtering options.
-   * @returns A data table object containing the total count and rows of the retrieved records.
-   */
+  protected model: string;
+  constructor(modelName: string) {
+    // Optional: If you have a dedicated connection file (e.g., prisma/connect.ts)
+    // this.prisma = prisma; // Uncomment if using a centralized connection
+
+    // Alternative: Initialize Prisma directly in BaseService (if no centralized connection)
+    this.prisma = new PrismaClient();
+    this.model = modelName;
+  }
+
+  protected getModelAttributes() {
+    return Prisma.dmmf.datamodel.models.find(model => model.name === this.model)?.fields.map(field => field.name) || [];
+  }
+
+  public async updateAction(
+    { ids, field }: IUpdateAction, // Field object with name and value
+  ): Promise<number> {
+    const { name, value } = field;
+
+    const updateData: Record<string, any> = { [name]: value }; // Ensure type safety
+
+    const whereClause = { id: { in: ids } }; // Apply update to records with IDs in the provided list
+
+    try {
+      const updateResult = await this.prisma[this.model].updateMany({
+        where: whereClause,
+        data: updateData,
+      });
+
+      // Return the count of affected rows (consider using select: { count: true } for efficiency)
+      return updateResult.count;
+    } catch (error) {
+      // Handle errors gracefully, e.g., log the error and throw a specific exception
+      throw new Error(`Error updating column: ${error.message}`);
+    }
+  }
+
   public async findAllPaginate({
     pageNumber = 1,
     perPage = 10,
@@ -25,56 +50,42 @@ export class BaseService<T extends Model> {
     ignoreGlobal = [],
     sort = 'createdAt',
     order = 'ASC',
-    include = [],
   }: IFindAllPaginateOptions = {}): Promise<IDataTable<T>> {
-    const offset = (pageNumber - 1) * perPage;
+    const skip = (pageNumber - 1) * perPage;
 
-    // Build the Sequelize "where" object dynamically
-    const where: TRecord = {};
-    for (const [key, value] of Object.entries(filters)) {
-      if (typeof value === 'string') {
-        // Apply a case-insensitive LIKE query for string filters
-        where[key] = { [Op.like]: `%${value}%` };
-      } else {
-        // Apply equality or other operators as necessary
-        where[key] = value;
-      }
-    }
+    // Build the Prisma "where" object dynamically
+    const where: Prisma.UserWhereInput = this.buildWhereClause(filters, q, ignoreGlobal);
 
-    // Construct Sequelize query options
-    const options: FindOptions & CountOptions = {
-      where: this.buildWhereClause(filters, q, ignoreGlobal),
-      limit: perPage,
-      offset: offset,
-      order: [[sort, order]],
-      include,
-    };
+    // Construct Prisma query options
+    const result = await this.prisma[this.model].findMany({
+      where,
+      skip,
+      take: perPage,
+      orderBy: {
+        [sort]: order.toLowerCase(),
+      },
+    });
 
-    // Execute the query with pagination and return the result
-    const result = await this.model.findAndCountAll(options);
+    // Count the total number of records
+    const count = await this.prisma[this.model].count({ where });
+
     return {
-      count: result.count,
-      rows: result.rows as T[],
+      count,
+      rows: result as T[],
     };
   }
 
-  /**
-   * Constructs a Sequelize "where" clause for filtering and global search.
-   * @param filters Key-value pairs representing column filters.
-   * @param q A global search query string.
-   * @param ignoreGlobal An array of column names to ignore in the global search.
-   * @returns A Sequelize "where" clause object.
-   */
-  private buildWhereClause(filters: TRecord, q?: string, ignoreGlobal: string[] = []): TRecord {
-    const whereClause: TRecord = {};
+  private buildWhereClause(filters: Record<string, any>, q?: string, ignoreGlobal: string[] = []): Prisma.UserWhereInput {
+    const whereClause: Prisma.UserWhereInput = {};
 
     // Add filters to the where clause
     Object.keys(filters).forEach(key => {
       if (filters[key] !== undefined && key !== 'q') {
-        // Apply LIKE operator for string filters, otherwise use equality
+        // Apply string filters
         if (typeof filters[key] === 'string') {
           whereClause[key] = {
-            [Op.like]: `%${filters[key]}%`, // Use Op.like for partial matches
+            contains: filters[key],
+            mode: 'insensitive',
           };
         } else {
           whereClause[key] = filters[key];
@@ -84,15 +95,15 @@ export class BaseService<T extends Model> {
 
     // Add global search conditions if `q` is provided
     if (q) {
-      const globalSearchConditions: Array<TRecord> = [];
-      const attributes = this.model.getAttributes();
+      const globalSearchConditions: Prisma.UserWhereInput[] = [];
 
-      // Iterate over the model's attributes (columns)
-      for (const key of Object.keys(attributes)) {
+      // Iterate over the fields (attributes) of the model
+      for (const key of Object.keys(this.getModelAttributes())) {
         if (!ignoreGlobal.includes(key)) {
           globalSearchConditions.push({
             [key]: {
-              [Op.like]: `%${q}%`, // Use LIKE operator for partial matches
+              contains: q,
+              mode: 'insensitive',
             },
           });
         }
@@ -100,44 +111,10 @@ export class BaseService<T extends Model> {
 
       // Combine global search conditions using OR operator
       if (globalSearchConditions.length > 0) {
-        whereClause[Op.or as unknown as keyof typeof Op] = globalSearchConditions;
+        whereClause.AND = globalSearchConditions;
       }
     }
 
     return whereClause;
-  }
-
-  /**
-   * Updates a specific field for multiple records identified by their primary IDs.
-   * @param ids Array of primary IDs of the records to be updated.
-   * @param field An object containing the name of the column to update and its new value.
-   * @returns The number of affected rows.
-   */
-  public async updateAction({ ids, field }: IUpdateAction): Promise<number> {
-    // Destructure the field object to get the column name and value
-    const { name, value } = field;
-
-    // Define the update data as a generic record type
-    const updateData: Partial<T> = { [name]: value } as Partial<T>;
-
-    // Define the options for the update, including the where clause
-    const options: UpdateOptions = {
-      where: {},
-    };
-
-    // Handle the "all" case or specific IDs
-    if (!ids.includes('all')) {
-      options.where = {
-        id: {
-          [Op.in]: ids, // Apply the update to records with IDs in the provided list
-        },
-      };
-    }
-
-    // Perform the update operation and get the count of affected rows
-    const [affectedRows] = await this.model.update(updateData, options);
-
-    // Return the number of affected rows
-    return affectedRows;
   }
 }
