@@ -9,6 +9,7 @@ import hpp from "hpp";
 import path from "path";
 import {ErrorMiddleware} from "@/middlewares/error.middleware";
 import sequelize from "@/models";
+import {initializePassport} from "@/config/passport";
 
 
 export class App {
@@ -25,10 +26,11 @@ export class App {
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
     this.initializeErrorHandling();
+    initializePassport();
+
   }
 
   public async listen() {
-    await this.initializeDatabaseConnection()
     this.app.listen(this.port, () => {
       console.info(`=================================`);
       console.info(`======= ENV: ${this.env} =======`);
@@ -56,10 +58,6 @@ export class App {
 
   private initializeErrorHandling() {
     this.app.use(ErrorMiddleware);
-  }
-
-  private async initializeDatabaseConnection() {
-    await sequelize.sync();
   }
 
 }

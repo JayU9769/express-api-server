@@ -14,10 +14,23 @@ model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   name      String
+  phoneNo   String
   password  String
-  status    String
+  status    Int      @default(1)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("users")
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String
+  password  String
+  status    Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admins")
 }
