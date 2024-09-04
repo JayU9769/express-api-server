@@ -27,7 +27,7 @@ export class UserService extends BaseService<User> {
 
     const hashedPassword = await hash(userData.password, 10);
     const newUser = await this.prisma.user.create({
-      data: { name: userData.name, email: userData.email, status: userData.status, password: hashedPassword },
+      data: { ...userData, password: hashedPassword },
     });
 
     return newUser;
