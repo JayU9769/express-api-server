@@ -17,6 +17,11 @@ async function seed() {
           value: 'users',
           description: 'Create Dummy users',
         },
+        {
+          name: 'Admins',
+          value: 'admins',
+          description: 'Create Dummy Admins',
+        },
       ],
     })
 
@@ -27,6 +32,7 @@ async function seed() {
     // Dynamically import the correct seeder module
     const seederMap: { [key: string]: string } = {
       users: './userSeeder',
+      admins: './adminSeeder',
     };
 
     const seederModule = seederMap[entity];
