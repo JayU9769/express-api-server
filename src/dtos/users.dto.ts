@@ -16,6 +16,12 @@ export class CreateUserDto {
 
 export class UpdateUserDto {
   @IsString()
+  public name: string;
+
+  @IsEmail()
+  public email: string;
+
+  @IsString()
   @IsNotEmpty()
   @MinLength(8)
   @MaxLength(32)

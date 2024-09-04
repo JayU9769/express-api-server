@@ -5,9 +5,11 @@ import {HttpException} from '@/exceptions/HttpException';
 import {User as UserModel} from '@/models/user.model';
 import {BaseService} from './base/base.service';
 import {Op} from "sequelize";
+import { PrismaClient } from '@prisma/client';
 
 @Service()
 export class UserService extends BaseService<UserModel> {
+  // public users = new PrismaClient().user;
   constructor() {
     super(UserModel);
   }

@@ -8,7 +8,13 @@
     "dev": "cross-env NODE_ENV=development nodemon",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "format": "prettier --write 'src/**/*.{ts,tsx}'",
-    "seed": "npm run build && node dist/src/seeders/index.js"
+    "seed": "npm run build && node dist/src/seeders/index.js",
+    "prisma:init": "prisma init",
+    "prisma:migrate": "prisma migrate dev --preview-feature",
+    "prisma:generate": "prisma generate"
+  },
+  "prisma": {
+    "schema": "src/prisma/schema.prisma"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +23,7 @@
   "dependencies": {
     "@faker-js/faker": "^8.4.1",
     "@inquirer/prompts": "^5.3.8",
+    "@prisma/client": "^5.19.1",
     "@sequelize/mysql": "^7.0.0-alpha.41",
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
@@ -29,7 +36,7 @@
     "dotenv": "^16.4.5",
     "envalid": "^8.0.0",
     "express": "^4.19.2",
-    "faker": "^6.6.6",
+    "faker": "^5.5.3",
     "hpp": "^0.2.3",
     "inquirer": "^10.1.8",
     "jsonwebtoken": "^9.0.2",
@@ -65,6 +72,7 @@
     "eslint-plugin-prettier": "^5.2.1",
     "nodemon": "^3.1.4",
     "prettier": "^3.3.3",
+    "prisma": "^5.19.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4"
   }
