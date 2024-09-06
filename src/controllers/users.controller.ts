@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { Container } from 'typedi';
-import { User } from '@/interfaces/users.interface';
+import { User } from 'prisma';
 import { UserService } from '@/services/users.service';
 import { IDataTable, IFindAllPaginateOptions } from '@/interfaces/datatable.interface';
 import { IUpdateAction, TSortType } from '@/interfaces/global.interface';
@@ -37,7 +37,6 @@ export class UserController {
 
       // Fetch paginated user data
       const findAllUsersData: IDataTable<User> = await this.user.findAllPaginate(options);
-
       // Respond with the fetched data
       res.status(200).json({ data: findAllUsersData, message: 'findAll' });
     } catch (error) {
@@ -57,7 +56,7 @@ export class UserController {
     try {
       const userId: string = req.params.id;
       // Find user by ID
-      const findOneUserData: User = await this.user.findUserById(userId);
+      const findOneUserData: User = await this.user.findUserById(Number(userId));
 
       // Respond with the fetched user data
       res.status(200).json({ data: findOneUserData, message: 'findOne' });
@@ -119,7 +118,7 @@ export class UserController {
    */
   public deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userIds: string[] = req.body.ids;
+      const userIds: number[] = req.body.ids;
       // Delete user by ID
       await this.user.deleteUser(userIds);
 
