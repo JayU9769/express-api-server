@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { Container } from 'typedi';
 import { User } from 'prisma';
-import { UserService } from '@/services/users.service';
+import { UserService } from '@/services/user.service';
 import { IDataTable, IFindAllPaginateOptions } from '@/interfaces/datatable.interface';
 import { IUpdateAction, TSortType } from '@/interfaces/global.interface';
 

@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { UserController } from '@/controllers/users.controller';
+import { UserController } from '@/controllers/user.controller';
 import { CreateUserDto, UpdateUserDto } from '@/dtos/users.dto';
-import { Routes } from '@/interfaces/routes.interface';
+import { Routes } from '@/interfaces/route.interface';
 import { ValidationMiddleware } from '@/middlewares/validation.middleware';
 import {DeleteActionDto, UpdateActionDto} from '@/dtos/global.dto';
 

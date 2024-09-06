@@ -4,7 +4,7 @@ import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import {CREDENTIALS, NODE_ENV, ORIGIN, PORT} from "@/config";
-import {Routes} from "@/interfaces/routes.interface";
+import {Routes} from "@/interfaces/route.interface";
 import hpp from "hpp";
 import path from "path";
 import {ErrorMiddleware} from "@/middlewares/error.middleware";

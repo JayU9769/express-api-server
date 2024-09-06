@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import {Routes} from "@/interfaces/routes.interface";
+import {Routes} from "@/interfaces/route.interface";
 
 
 export class HomeRoute implements Routes {
