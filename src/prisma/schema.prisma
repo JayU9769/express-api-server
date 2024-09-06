@@ -34,3 +34,58 @@ model Admin {
 
   @@map("admins")
 }
+
+enum UserType {
+  admin
+  user
+}
+
+model Role {
+  id        Int      @id @default(autoincrement())
+  name      String
+  type      UserType @default(user)
+  status    Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  modelHasRoles      ModelHasRole[]
+  roleHasPermissions RoleHasPermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id        Int      @id @default(autoincrement())
+  name      String
+  type      UserType @default(user)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  roleHasPermissions RoleHasPermission[]
+
+  @@map("permissions")
+}
+
+model ModelHasRole {
+  id        Int      @id @default(autoincrement())
+  roleId    Int
+  modelId   Int
+  // societyId Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@map("model_has_roles")
+}
+
+model RoleHasPermission {
+  roleId       Int
+  permissionId Int
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId]) // Composite primary key
+  @@map("role_has_permissions")
+}
