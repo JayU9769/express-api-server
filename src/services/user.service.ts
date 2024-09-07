@@ -85,7 +85,7 @@ export class UserService extends BaseService<User> {
     }
 
     // Check if another user exists with the same email but a different ID
-    if (data.email && data.email !== findUser.email) {
+    if (data.email && data.email.toLowerCase() !== findUser.email.toLowerCase()) {
       const existingUserWithEmail: User | null = await this.prisma.user.findUnique({
         where: { email: data.email },
       });

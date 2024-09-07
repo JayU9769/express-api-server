@@ -78,7 +78,7 @@ export class RoleService extends BaseService<Role> {
     }
 
     // Check if another role exists with the same name but a different ID
-    if (data.name && data.name !== findRole.name) {
+    if (data.name && data.name.toLowerCase() !== findRole.name.toLowerCase()) {
       const existingRoleWithName: Role | null = await this.prisma.role.findUnique({
         where: { name: data.name },
       });
