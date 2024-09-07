@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { Routes } from '@/interfaces/route.interface';
 import { ValidationMiddleware } from '@/middlewares/validation.middleware';
-import {LoginAdminDto} from "@/dtos/admins.dto";
+import {LoginAdminDto} from "@/dtos/admin.dto";
 import {AdminController} from "@/controllers/admin.controller";
 import {passport} from "@/config/passport";
 

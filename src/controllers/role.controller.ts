@@ -1,25 +1,25 @@
 import { NextFunction, Request, Response } from 'express';
 import { Container } from 'typedi';
-import { UserService } from '@/services/user.service';
+import { RoleService } from '@/services/role.service';
 import { IDataTable, IFindAllPaginateOptions } from '@/interfaces/datatable.interface';
 import { IUpdateAction, TSortType } from '@/interfaces/global.interface';
-import {User} from "@prisma/client";
+import { Role } from "@prisma/client";
 
 /**
- * Controller handling user-related HTTP requests.
+ * Controller handling role-related HTTP requests.
  */
-export class UserController {
-  public user = Container.get(UserService);
+export class RoleController {
+  public role = Container.get(RoleService);
 
   /**
-   * Retrieves a paginated list of users based on query parameters.
+   * Retrieves a paginated list of roles based on query parameters.
    * Supports pagination, filtering, sorting, and search.
    * @method get
    * @param req Express request object
    * @param res Express response object
    * @param next Express next function for error handling
    */
-  public getUsers = async (req: Request, res: Response, next: NextFunction) => {
+  public getRoles = async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Destructure query parameters with default values
       const { pageNumber = 0, perPage = 10, sort = 'createdAt', order = 'ASC', ...filters } = req.query;
@@ -35,10 +35,11 @@ export class UserController {
         order: String(order).toUpperCase() as TSortType,
       };
 
-      // Fetch paginated user data
-      const findAllUsersData: IDataTable<User> = await this.user.findAllPaginate(options);
+      // Fetch paginated role data
+      const findAllRolesData: IDataTable<Role> = await this.role.findAllPaginate(options);
+
       // Respond with the fetched data
-      res.status(200).json({ data: findAllUsersData, message: 'findAll' });
+      res.status(200).json({ data: findAllRolesData, message: 'findAll' });
     } catch (error) {
       // Pass any errors to the next error handling middleware
       next(error);
@@ -46,20 +47,20 @@ export class UserController {
   };
 
   /**
-   * Retrieves a single user by their ID.
+   * Retrieves a single role by its ID.
    * @method get
-   * @param req Express request object with user ID in params
+   * @param req Express request object with role ID in params
    * @param res Express response object
    * @param next Express next function for error handling
    */
-  public getUserById = async (req: Request, res: Response, next: NextFunction) => {
+  public getRoleById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId: string = req.params.id;
-      // Find user by ID
-      const findOneUserData: User = await this.user.findById(Number(userId));
+      const roleId: string = req.params.id;
+      // Find role by ID
+      const findOneRoleData: Role = await this.role.findById(Number(roleId));
 
-      // Respond with the fetched user data
-      res.status(200).json({ data: findOneUserData, message: 'findOne' });
+      // Respond with the fetched role data
+      res.status(200).json({ data: findOneRoleData, message: 'findOne' });
     } catch (error) {
       // Pass any errors to the next error handling middleware
       next(error);
@@ -67,20 +68,20 @@ export class UserController {
   };
 
   /**
-   * Creates a new user with provided data.
+   * Creates a new role with provided data.
    * @method post
-   * @param req Express request object with user data in body
+   * @param req Express request object with role data in body
    * @param res Express response object
    * @param next Express next function for error handling
    */
-  public createUser = async (req: Request, res: Response, next: NextFunction) => {
+  public createRole = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userData: User = req.body;
-      // Create new user
-      const createUserData: User = await this.user.create(userData);
+      const roleData: Role = req.body;
+      // Create new role
+      const createRoleData: Role = await this.role.create(roleData);
 
-      // Respond with the created user data
-      res.status(201).json({ data: createUserData, message: 'created' });
+      // Respond with the created role data
+      res.status(201).json({ data: createRoleData, message: 'created' });
     } catch (error) {
       // Pass any errors to the next error handling middleware
       next(error);
@@ -88,21 +89,21 @@ export class UserController {
   };
 
   /**
-   * Updates an existing user with provided data.
+   * Updates an existing role with provided data.
    * @method put
-   * @param req Express request object with user ID in params and user data in body
+   * @param req Express request object with role ID in params and role data in body
    * @param res Express response object
    * @param next Express next function for error handling
    */
-  public updateUser = async (req: Request, res: Response, next: NextFunction) => {
+  public updateRole = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId: string = req.params.id;
-      const userData: User = req.body;
-      // Update user by ID
-      const updateUserData: User = await this.user.update(Number(userId), userData);
+      const roleId: string = req.params.id;
+      const roleData: Role = req.body;
+      // Update role by ID
+      const updateRoleData: Role = await this.role.update(Number(roleId), roleData);
 
-      // Respond with the updated user data
-      res.status(200).json({ data: updateUserData, message: 'updated' });
+      // Respond with the updated role data
+      res.status(200).json({ data: updateRoleData, message: 'updated' });
     } catch (error) {
       // Pass any errors to the next error handling middleware
       next(error);
@@ -110,17 +111,17 @@ export class UserController {
   };
 
   /**
-   * Deletes a user by their ID.
+   * Deletes a role by its ID.
    * @method delete
-   * @param req Express request object with user ID in params
+   * @param req Express request object with role ID in params
    * @param res Express response object
    * @param next Express next function for error handling
    */
-  public deleteUser = async (req: Request, res: Response, next: NextFunction) => {
+  public deleteRole = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userIds: number[] = req.body.ids;
-      // Delete user by ID
-      await this.user.delete(userIds);
+      const roleIds: number[] = req.body.ids;
+      // Delete role by ID
+      await this.role.delete(roleIds);
 
       // Respond with success message
       res.status(200).json({ message: 'deleted' });
@@ -131,9 +132,9 @@ export class UserController {
   };
 
   /**
-   * Single action a users by their ID & Type.
+   * Single action a role by its ID & Type.
    * @method post
-   * @param req Express request object with user ID in params
+   * @param req Express request object with role ID in params
    * @param res Express response object
    * @param next Express next function for error handling
    */
@@ -141,7 +142,7 @@ export class UserController {
     try {
       const { ids, field }: IUpdateAction = req.body;
 
-      await this.user.updateAction({ ids, field });
+      await this.role.updateAction({ ids, field });
 
       // Respond with success message
       res.status(200).json({ message: 'Updated Bulk Action' });
