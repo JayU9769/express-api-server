@@ -56,7 +56,7 @@ export class UserController {
     try {
       const userId: string = req.params.id;
       // Find user by ID
-      const findOneUserData: User = await this.user.findUserById(Number(userId));
+      const findOneUserData: User = await this.user.findById(Number(userId));
 
       // Respond with the fetched user data
       res.status(200).json({ data: findOneUserData, message: 'findOne' });
@@ -77,7 +77,7 @@ export class UserController {
     try {
       const userData: User = req.body;
       // Create new user
-      const createUserData: User = await this.user.createUser({ ...userData });
+      const createUserData: User = await this.user.create(userData);
 
       // Respond with the created user data
       res.status(201).json({ data: createUserData, message: 'created' });
@@ -99,7 +99,7 @@ export class UserController {
       const userId: string = req.params.id;
       const userData: User = req.body;
       // Update user by ID
-      const updateUserData: User = await this.user.updateUser(Number(userId), userData);
+      const updateUserData: User = await this.user.update(Number(userId), userData);
 
       // Respond with the updated user data
       res.status(200).json({ data: updateUserData, message: 'updated' });
@@ -120,7 +120,7 @@ export class UserController {
     try {
       const userIds: number[] = req.body.ids;
       // Delete user by ID
-      await this.user.deleteUser(userIds);
+      await this.user.delete(userIds);
 
       // Respond with success message
       res.status(200).json({ message: 'deleted' });

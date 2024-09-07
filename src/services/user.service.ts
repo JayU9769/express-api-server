@@ -1,8 +1,8 @@
-import { hash } from 'bcrypt';
-import { Service } from 'typedi';
-import { HttpException } from '@/exceptions/HttpException';
-import { User } from '@prisma/client';
-import { BaseService } from './base/base.service';
+import {hash} from 'bcrypt';
+import {Service} from 'typedi';
+import {HttpException} from '@/exceptions/HttpException';
+import {User} from '@prisma/client';
+import {BaseService} from "@/services/base/base.service";
 
 @Service()
 export class UserService extends BaseService<User> {
@@ -10,7 +10,11 @@ export class UserService extends BaseService<User> {
     super('User');
   }
 
-  public async findUserById(userId: number): Promise<User> {
+  public async findAll(): Promise<User[]> {
+    return this.prisma.user.findMany();
+  }
+
+  public async findById(userId: number): Promise<User> {
     const findUser: User = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -19,49 +23,45 @@ export class UserService extends BaseService<User> {
     return findUser;
   }
 
-  public async createUser(userData: User): Promise<User> {
+  public async create(data: User): Promise<User> {
     const findUser: User = await this.prisma.user.findUnique({
-      where: { email: userData.email },
+      where: { email: data.email },
     });
-    if (findUser) throw new HttpException(409, `This email ${userData.email} already exists`);
+    if (findUser) throw new HttpException(409, `This email ${data.email} already exists`);
 
-    const hashedPassword = await hash(userData.password, 10);
-    const newUser = await this.prisma.user.create({
-      data: { ...userData, password: hashedPassword },
+    const hashedPassword = await hash(data.password, 10);
+    return this.prisma.user.create({
+      data: {...data, password: hashedPassword},
     });
-
-    return newUser;
   }
 
-  public async updateUser(userId: number, userData: User): Promise<User> {
+  public async update(userId: number, data: User): Promise<User> {
     const findUserByEmail: User = await this.prisma.user.findUnique({
-      where: { email: userData.email },
+      where: { email: data.email },
     });
 
     if (findUserByEmail && findUserByEmail.id !== userId) {
-      throw new HttpException(409, `This email ${userData.email} already exists`);
+      throw new HttpException(409, `This email ${data.email} already exists`);
     }
 
-    if (userData.password) {
-      const hashedPassword = await hash(userData.password, 10);
-      userData = { ...userData, password: hashedPassword };
+    if (data.password) {
+      const hashedPassword = await hash(data.password, 10);
+      data = { ...data, password: hashedPassword };
     }
 
-    const updatedUser = await this.prisma.user.update({
-      where: { id: userId },
-      data: userData,
+    return this.prisma.user.update({
+      where: {id: userId},
+      data: data,
     });
-
-    return updatedUser;
   }
 
-  public async deleteUser(userIds: number[]): Promise<boolean> {
-    const deleteUser = await this.prisma.user.deleteMany({
+  public async delete(userIds: number[]): Promise<boolean> {
+    const result = await this.prisma.user.deleteMany({
       where: {
         id: { in: userIds },
       },
     });
-    if (!deleteUser.count) throw new HttpException(409, "User doesn't exist");
+    if (!result.count) throw new HttpException(409, "User doesn't exist");
 
     return true;
   }
