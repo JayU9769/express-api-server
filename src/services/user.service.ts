@@ -63,24 +63,37 @@ export class UserService extends BaseService<User> {
       data: { ...data, password: hashedPassword },
     });
   }
-
   /**
    * Updates an existing user by their ID with the provided data.
    * If the password is updated, it is hashed before saving.
+   * Validates that the email is unique across users.
    * @param {number} userId - The ID of the user to update.
    * @param {User} data - The new data for the user.
    * @returns {Promise<User>} - A promise that resolves to the updated user.
    * @throws {HttpException} - Throws an exception if the email already exists for a different user.
+   * @throws {HttpException} - Throws an exception if the user with the provided ID is not found.
    */
   public async update(userId: number, data: User): Promise<User> {
-    // Check if another user exists with the same email
-    const findUserByEmail: User = await this.prisma.user.findUnique({
-      where: { email: data.email },
+    // Find the user by ID to ensure the user exists
+    const findUser: User | null = await this.prisma.user.findUnique({
+      where: { id: userId },
     });
 
-    // Throw an error if email belongs to another user
-    if (findUserByEmail && findUserByEmail.id !== userId) {
-      throw new HttpException(409, `This email ${data.email} already exists`);
+    // Throw an error if unable to find user with userId
+    if (!findUser) {
+      throw new HttpException(404, `User with ID ${userId} not found`);
+    }
+
+    // Check if another user exists with the same email but a different ID
+    if (data.email && data.email !== findUser.email) {
+      const existingUserWithEmail: User | null = await this.prisma.user.findUnique({
+        where: { email: data.email },
+      });
+
+      // Throw an error if an existing user with the same email is found
+      if (existingUserWithEmail) {
+        throw new HttpException(409, `Email ${data.email} is already in use by another user`);
+      }
     }
 
     // Hash the new password if provided

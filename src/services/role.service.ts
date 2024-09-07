@@ -59,23 +59,37 @@ export class RoleService extends BaseService<Role> {
 
   /**
    * Updates an existing role by its ID with the provided data.
+   * Validates that the role name is unique across roles.
    * @param {number} roleId - The ID of the role to update.
    * @param {Role} data - The new data for the role.
    * @returns {Promise<Role>} - A promise that resolves to the updated role.
    * @throws {HttpException} - Throws an exception if the role name already exists for a different role.
+   * @throws {HttpException} - Throws an exception if the role with the provided ID is not found.
    */
   public async update(roleId: number, data: Role): Promise<Role> {
-    // Check if another role exists with the same name
-    const findRoleByName: Role = await this.prisma.role.findUnique({
-      where: { name: data.name },
+    // Find the role by ID to ensure the role exists
+    const findRole: Role | null = await this.prisma.role.findUnique({
+      where: { id: roleId },
     });
 
-    // Throw an error if the name belongs to another role
-    if (findRoleByName && findRoleByName.id !== roleId) {
-      throw new HttpException(409, `This role ${data.name} already exists`);
+    // Throw an error if unable to find role with roleId
+    if (!findRole) {
+      throw new HttpException(404, `Role with ID ${roleId} not found`);
     }
 
-    // Update the role with the new data
+    // Check if another role exists with the same name but a different ID
+    if (data.name && data.name !== findRole.name) {
+      const existingRoleWithName: Role | null = await this.prisma.role.findUnique({
+        where: { name: data.name },
+      });
+
+      // Throw an error if an existing role with the same name is found
+      if (existingRoleWithName) {
+        throw new HttpException(409, `Role name ${data.name} is already in use by another role`);
+      }
+    }
+
+    // Update the role with new data
     return this.prisma.role.update({
       where: { id: roleId },
       data: data,

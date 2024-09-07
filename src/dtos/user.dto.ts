@@ -1,4 +1,4 @@
-import { IsEmail, IsInt, IsOptional, IsString, MinLength, IsNotEmpty, IsPhoneNumber } from 'class-validator';
+import {IsEmail, IsInt, IsOptional, IsString, MinLength, IsNotEmpty, IsPhoneNumber, Min} from 'class-validator';
 
 /**
  * DTO for creating a new user.
@@ -13,7 +13,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   public name: string;
 
-  @IsPhoneNumber(null)
+  @IsPhoneNumber("IN")
   @IsNotEmpty()
   public phoneNo: string;
 
@@ -24,6 +24,7 @@ export class CreateUserDto {
 
   @IsInt()
   @IsOptional()
+  @Min(0, { message: 'Status must be 0 or 1' })
   public status?: number;
 }
 
