@@ -1,16 +1,15 @@
 import 'reflect-metadata';
-import express from "express";
+import express from 'express';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import {CREDENTIALS, NODE_ENV, ORIGIN, PORT} from "@/config";
-import {Routes} from "@/interfaces/route.interface";
-import hpp from "hpp";
-import path from "path";
-import {ErrorMiddleware} from "@/middlewares/error.middleware";
-import sequelize from "@/models";
-import {initializePassport} from "@/config/passport";
-
+import hpp from 'hpp';
+import path from 'path';
+import { CREDENTIALS, NODE_ENV, ORIGIN, PORT } from '@/config';
+import { Routes } from '@/interfaces/route.interface';
+import { ErrorMiddleware } from '@/middlewares/error.middleware';
+import { initializePassport, passport } from '@/config/passport';
+import { initializeSession } from './config/session';
 
 export class App {
   public app: express.Application;
@@ -22,12 +21,10 @@ export class App {
     this.env = NODE_ENV || 'development';
     this.port = PORT || 3000;
 
-
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
     this.initializeErrorHandling();
-    initializePassport();
-
+    initializePassport(); // Initialize passport strategies
   }
 
   public async listen() {
@@ -39,15 +36,24 @@ export class App {
     });
   }
 
-
   private initializeMiddlewares() {
-    this.app.use(cors({origin: ORIGIN, credentials: CREDENTIALS}));
+    // Apply CORS and cookie parser before sessions
+    this.app.use(cors({ origin: ORIGIN, credentials: CREDENTIALS }));
+    this.app.use(express.json());
+    this.app.use(cookieParser());
+
+    // Initialize session before Passport middlewares
+    this.app.use(initializeSession());
+
+    // Passport initialization
+    this.app.use(passport.initialize());
+    this.app.use(passport.session());
+
+    // Other middleware
     this.app.use(hpp());
     this.app.use(compression());
-    this.app.use(express.json());
     this.app.use(express.static(path.join(__dirname, '..', 'public')));
-    this.app.use(express.urlencoded({extended: true}));
-    this.app.use(cookieParser());
+    this.app.use(express.urlencoded({ extended: true }));
   }
 
   private initializeRoutes(routes: Routes[]) {
@@ -59,5 +65,4 @@ export class App {
   private initializeErrorHandling() {
     this.app.use(ErrorMiddleware);
   }
-
 }
