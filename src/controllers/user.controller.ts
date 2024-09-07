@@ -22,7 +22,13 @@ export class UserController {
   public getUsers = async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Destructure query parameters with default values
-      const { pageNumber = 0, perPage = 10, sort = 'createdAt', order = 'ASC', ...filters } = req.query;
+      const {
+        pageNumber = 0,
+        perPage = 10,
+        sort = 'createdAt',
+        order = 'ASC',
+        ...filters
+      } = req.query;
 
       // Prepare options for pagination and filtering
       const options: IFindAllPaginateOptions = {

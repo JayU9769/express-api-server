@@ -11,7 +11,7 @@ generator client {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(cuid())
   email     String   @unique
   name      String
   phoneNo   String
@@ -20,17 +20,21 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  modelHasRoles ModelHasRole[]
+
   @@map("users")
 }
 
 model Admin {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(cuid())
   email     String   @unique
   name      String
   password  String
   status    Int      @default(1)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  modelHasRoles ModelHasRole[]
 
   @@map("admins")
 }
@@ -41,7 +45,7 @@ enum UserType {
 }
 
 model Role {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(cuid())
   name      String   @unique
   type      UserType @default(user)
   status    Int      @default(1)
@@ -55,7 +59,7 @@ model Role {
 }
 
 model Permission {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(cuid())
   name      String
   type      UserType @default(user)
   createdAt DateTime @default(now())
@@ -67,21 +71,24 @@ model Permission {
 }
 
 model ModelHasRole {
-  id        Int      @id @default(autoincrement())
-  roleId    Int
-  modelId   Int
-  // societyId Int?
+  id        String   @id @default(cuid())
+  roleId    String
+  modelId   String
+  modelType UserType @default(user)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
+  user  User  @relation(fields: [modelId], references: [id], onDelete: Cascade, map: "user")
+  admin Admin @relation(fields: [modelId], references: [id], onDelete: Cascade, map: "admin")
+
   @@map("model_has_roles")
 }
 
 model RoleHasPermission {
-  roleId       Int
-  permissionId Int
+  roleId       String
+  permissionId String
 
   role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
   permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
