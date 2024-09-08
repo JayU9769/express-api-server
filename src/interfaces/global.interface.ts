@@ -1,3 +1,5 @@
+import { Admin } from '@prisma/client';
+
 export type TSortType = 'ASC' | 'DESC';
 
 export type TRecord = Record<string, any>;
@@ -8,4 +10,10 @@ export interface IUpdateAction {
     name: string;
     value: string;
   };
+}
+
+declare global {
+  namespace Express {
+    interface User extends Admin {}
+  }
 }
