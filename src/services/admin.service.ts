@@ -28,11 +28,11 @@ export class AdminService extends BaseService<Admin> {
 
   /**
    * Finds a user by their unique ID.
-   * @param {number} userId - The ID of the user to find.
+   * @param {string} userId - The ID of the user to find.
    * @returns {Promise<User>} - A promise that resolves to the found user or throws an exception if not found.
    * @throws {HttpException} - Throws an exception if the user does not exist.
    */
-  public async findById(userId: number): Promise<Admin> {
+  public async findById(userId: string): Promise<Admin> {
     const findUser: Admin = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -67,13 +67,13 @@ export class AdminService extends BaseService<Admin> {
    * Updates an existing user by their ID with the provided data.
    * If the password is updated, it is hashed before saving.
    * Validates that the email is unique across users.
-   * @param {number} userId - The ID of the user to update.
+   * @param {string} userId - The ID of the user to update.
    * @param {User} data - The new data for the user.
    * @returns {Promise<User>} - A promise that resolves to the updated user.
    * @throws {HttpException} - Throws an exception if the email already exists for a different user.
    * @throws {HttpException} - Throws an exception if the user with the provided ID is not found.
    */
-  public async update(userId: number, data: Admin): Promise<Admin> {
+  public async update(userId: string, data: Admin): Promise<Admin> {
     // Find the user by ID to ensure the user exists
     const findUser: Admin | null = await this.prisma.admin.findUnique({
       where: { id: userId },
@@ -105,11 +105,11 @@ export class AdminService extends BaseService<Admin> {
 
   /**
    * Deletes users by their IDs.
-   * @param {number[]} userIds - An array of user IDs to delete.
+   * @param {string[]} userIds - An array of user IDs to delete.
    * @returns {Promise<boolean>} - A promise that resolves to true if users were successfully deleted.
    * @throws {HttpException} - Throws an exception if no users were deleted.
    */
-  public async delete(userIds: number[]): Promise<boolean> {
+  public async delete(userIds: string[]): Promise<boolean> {
     // Attempt to delete users with the provided IDs
     const result = await this.prisma.admin.deleteMany({
       where: {
@@ -124,7 +124,7 @@ export class AdminService extends BaseService<Admin> {
   }
 
   // Update admin profile
-  public async updateProfile(adminId: number, name: string, email: string): Promise<Admin> {
+  public async updateProfile(adminId: string, name: string, email: string): Promise<Admin> {
     return await this.prisma.admin.update({
       where: { id: adminId },
       data: { name, email },
@@ -132,7 +132,7 @@ export class AdminService extends BaseService<Admin> {
   }
 
   // Update admin password
-  public async updatePassword(adminId: number, currentPassword: string, newPassword: string): Promise<void> {
+  public async updatePassword(adminId: string, currentPassword: string, newPassword: string): Promise<void> {
     const admin = await this.prisma.admin.findUnique({ where: { id: adminId } });
 
     if (!admin) {

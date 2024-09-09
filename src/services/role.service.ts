@@ -27,11 +27,11 @@ export class RoleService extends BaseService<Role> {
 
   /**
    * Finds a role by its unique ID.
-   * @param {number} roleId - The ID of the role to find.
+   * @param {string} roleId - The ID of the role to find.
    * @returns {Promise<Role>} - A promise that resolves to the found role or throws an exception if not found.
    * @throws {HttpException} - Throws an exception if the role does not exist.
    */
-  public async findById(roleId: number): Promise<Role> {
+  public async findById(roleId: string): Promise<Role> {
     const findRole: Role = await this.prisma.role.findUnique({
       where: { id: roleId },
     });
@@ -60,13 +60,13 @@ export class RoleService extends BaseService<Role> {
   /**
    * Updates an existing role by its ID with the provided data.
    * Validates that the role name is unique across roles.
-   * @param {number} roleId - The ID of the role to update.
+   * @param {string} roleId - The ID of the role to update.
    * @param {Role} data - The new data for the role.
    * @returns {Promise<Role>} - A promise that resolves to the updated role.
    * @throws {HttpException} - Throws an exception if the role name already exists for a different role.
    * @throws {HttpException} - Throws an exception if the role with the provided ID is not found.
    */
-  public async update(roleId: number, data: Role): Promise<Role> {
+  public async update(roleId: string, data: Role): Promise<Role> {
     // Find the role by ID to ensure the role exists
     const findRole: Role | null = await this.prisma.role.findUnique({
       where: { id: roleId },
@@ -98,11 +98,11 @@ export class RoleService extends BaseService<Role> {
 
   /**
    * Deletes roles by their IDs.
-   * @param {number[]} roleIds - An array of role IDs to delete.
+   * @param {string[]} roleIds - An array of role IDs to delete.
    * @returns {Promise<boolean>} - A promise that resolves to true if roles were successfully deleted.
    * @throws {HttpException} - Throws an exception if no roles were deleted.
    */
-  public async delete(roleIds: number[]): Promise<boolean> {
+  public async delete(roleIds: string[]): Promise<boolean> {
     // Attempt to delete roles with the provided IDs
     const result = await this.prisma.role.deleteMany({
       where: {

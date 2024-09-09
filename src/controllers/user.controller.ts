@@ -62,7 +62,7 @@ export class UserController {
     try {
       const userId: string = req.params.id;
       // Find user by ID
-      const findOneUserData: User = await this.user.findById(Number(userId));
+      const findOneUserData: User = await this.user.findById(userId);
 
       // Respond with the fetched user data
       res.status(200).json({ data: findOneUserData, message: 'findOne' });
@@ -105,7 +105,7 @@ export class UserController {
       const userId: string = req.params.id;
       const userData: User = req.body;
       // Update user by ID
-      const updateUserData: User = await this.user.update(Number(userId), userData);
+      const updateUserData: User = await this.user.update(userId, userData);
 
       // Respond with the updated user data
       res.status(200).json({ data: updateUserData, message: 'updated' });
@@ -124,7 +124,7 @@ export class UserController {
    */
   public deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userIds: number[] = req.body.ids;
+      const userIds: string[] = req.body.ids;
       // Delete user by ID
       await this.user.delete(userIds);
 

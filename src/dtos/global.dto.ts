@@ -13,7 +13,7 @@ class UpdateFieldDto {
 export class UpdateActionDto {
   @IsArray()
   @IsNotEmpty({ each: true })
-  public ids: Array<string | number>;
+  public ids: Array<string>;
 
   @IsObject()
   @ValidateNested()
@@ -24,5 +24,5 @@ export class UpdateActionDto {
 export class DeleteActionDto {
   @IsArray()
   @IsNotEmpty({ each: true })
-  public ids: Array<string | number>;
+  public ids: Array<string>;
 }
