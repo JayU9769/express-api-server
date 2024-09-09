@@ -1,4 +1,4 @@
-import { Admin } from '@prisma/client';
+import { Admin, User } from '@prisma/client';
 
 export type TSortType = 'ASC' | 'DESC';
 
@@ -14,6 +14,9 @@ export interface IUpdateAction {
 
 declare global {
   namespace Express {
-    interface User extends Admin {}
+    interface Request {
+      // @ts-ignore
+      user: User | Admin; // req.user can be either a User or Admin
+    }
   }
 }

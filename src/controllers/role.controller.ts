@@ -3,7 +3,7 @@ import { Container } from 'typedi';
 import { RoleService } from '@/services/role.service';
 import { IDataTable, IFindAllPaginateOptions } from '@/interfaces/datatable.interface';
 import { IUpdateAction, TSortType } from '@/interfaces/global.interface';
-import { Role } from "@prisma/client";
+import { Role } from '@prisma/client';
 
 /**
  * Controller handling role-related HTTP requests.
@@ -57,7 +57,7 @@ export class RoleController {
     try {
       const roleId: string = req.params.id;
       // Find role by ID
-      const findOneRoleData: Role = await this.role.findById(Number(roleId));
+      const findOneRoleData: Role = await this.role.findById(roleId);
 
       // Respond with the fetched role data
       res.status(200).json({ data: findOneRoleData, message: 'findOne' });
@@ -100,7 +100,7 @@ export class RoleController {
       const roleId: string = req.params.id;
       const roleData: Role = req.body;
       // Update role by ID
-      const updateRoleData: Role = await this.role.update(Number(roleId), roleData);
+      const updateRoleData: Role = await this.role.update(roleId, roleData);
 
       // Respond with the updated role data
       res.status(200).json({ data: updateRoleData, message: 'updated' });
@@ -119,7 +119,7 @@ export class RoleController {
    */
   public deleteRole = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const roleIds: number[] = req.body.ids;
+      const roleIds: string[] = req.body.ids;
       // Delete role by ID
       await this.role.delete(roleIds);
 

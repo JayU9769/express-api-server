@@ -3,31 +3,32 @@ import { HttpException } from '@/exceptions/HttpException';
 import { passport } from '@/config/passport';
 import { Container } from 'typedi';
 import { AdminService } from '@/services/admin.service';
+import { Admin } from '@prisma/client';
 
 export class AdminController {
   public admin = Container.get(AdminService);
 
   public login = async (req: Request, res: Response, next: NextFunction) => {
-    passport.authenticate('admin-local', (err, admin, info) => {
-      if (err || !admin) {
+    passport.authenticate('admin-local', (e: Error, admin: Admin) => {
+      if (e || !admin) {
         return next(new HttpException(401, 'Invalid credentials'));
       }
       req.login(admin, loginErr => {
         if (loginErr) {
           return next(new HttpException(500, 'Login failed'));
         }
-        return res.json({ message: 'Logged in successfully' });
+        return res.status(200).json({ message: 'Logged in successfully', data: admin });
       });
     })(req, res, next);
   };
 
   public logout = async (req: Request, res: Response) => {
-    req.logout(err => {
-      if (err) {
+    req.logout(e => {
+      if (e) {
         return res.status(500).json({ message: 'Error during logout' });
       }
       res.clearCookie('connect.sid'); // Clear session cookie
-      return res.json({ message: 'Logged out successfully' });
+      return res.status(200).json({ message: 'Logged out successfully' });
     });
   };
 
@@ -35,14 +36,15 @@ export class AdminController {
     if (!req.user) {
       return next(new HttpException(401, 'Not authenticated'));
     }
-    return res.json(req.user);
+    delete (req.user as Admin).password;
+    return res.status(200).json({ message: 'User Profile', data: req.user });
   };
 
   // Update profile details
   public updateProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { name, email } = req.body;
-      const adminId = req.user.id; // Now req.user is typed correctly
+      const adminId = (req.user as Admin).id; // Now req.user is typed correctly
 
       const updatedAdmin = await this.admin.updateProfile(adminId, name, email);
 
@@ -56,7 +58,7 @@ export class AdminController {
   public updatePassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { currentPassword, newPassword } = req.body;
-      const adminId = req.user.id; // Assuming req.user contains the logged-in admin
+      const adminId = (req.user as Admin).id; // Assuming req.user contains the logged-in admin
 
       await this.admin.updatePassword(adminId, currentPassword, newPassword);
 
