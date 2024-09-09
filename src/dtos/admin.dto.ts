@@ -1,4 +1,13 @@
-import { IsEmail, IsString, IsNotEmpty, MinLength, MaxLength } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  IsNotEmpty,
+  MinLength,
+  MaxLength,
+  IsInt,
+  IsOptional,
+  Min
+} from 'class-validator';
 
 export class LoginAdminDto {
   @IsEmail()
@@ -29,4 +38,52 @@ export class UpdatePasswordDto {
   @IsString()
   @MinLength(6, { message: 'Password must be at least 6 characters long' })
   public newPassword: string;
+}
+
+
+/**
+ * DTO for creating a new admin.
+ * Ensures validation rules are applied for fields like email, name, phoneNo, and password.
+ */
+export class CreateAdminDto {
+  @IsEmail()
+  @IsNotEmpty()
+  public email: string;
+
+  @IsString()
+  @IsNotEmpty()
+  public name: string;
+
+  @IsString()
+  @MinLength(6)
+  @IsNotEmpty()
+  public password: string;
+
+  @IsInt()
+  @IsOptional()
+  @Min(0, { message: 'Status must be 0 or 1' })
+  public status?: number;
+}
+
+/**
+ * DTO for updating an existing admin.
+ * Allows partial updates by making all fields optional.
+ */
+export class UpdateAdminDto {
+  @IsEmail()
+  @IsOptional()
+  public email?: string;
+
+  @IsString()
+  @IsOptional()
+  public name?: string;
+
+  @IsString()
+  @MinLength(6)
+  @IsOptional()
+  public password?: string;
+
+  @IsInt()
+  @IsOptional()
+  public status?: number;
 }

@@ -37,7 +37,7 @@ const initializePassport = () => {
   });
 
 
-  passport.deserializeUser(async (id: number, done) => {
+  passport.deserializeUser(async (id: string, done) => {
     try {
       const admin = await prisma.admin.findUnique({ where: { id } });
       if (admin) {
