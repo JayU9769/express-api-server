@@ -36,7 +36,6 @@ export class AdminController {
     if (!req.user) {
       return next(new HttpException(401, 'Not authenticated'));
     }
-    delete (req.user as Admin).password;
     return res.status(200).json({ message: 'User Profile', data: req.user });
   };
 

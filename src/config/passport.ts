@@ -11,7 +11,22 @@ const initializePassport = () => {
     'admin-local',
     new LocalStrategy({ usernameField: 'email' }, async (email: string, password: string, done: (err: any, user?: Admin, info?: any) => void) => {
       try {
-        const admin = await prisma.admin.findUnique({ where: { email } });
+        const admin = await prisma.admin.findUnique({
+          where: { email },
+          // include: {
+          //   modelHasRoles: {
+          //     include: {
+          //       role: {
+          //         include: {
+          //           roleHasPermissions: {
+          //             include: { permission: true },
+          //           },
+          //         },
+          //       },
+          //     },
+          //   },
+          // },
+        });
         if (!admin) {
           return done(new HttpException(401, 'No admin with that email'), null);
         }
@@ -24,8 +39,15 @@ const initializePassport = () => {
         if (!isMatch) {
           return done(new HttpException(401, 'Provided password is invalid'), null);
         }
-        delete admin.password;
-        return done(null, admin);
+        // const roles = admin.modelHasRoles.map(r => r.role.name);
+        // const permissions = admin.modelHasRoles.flatMap(r => r.role.roleHasPermissions.map(p => p.permission.name));
+        // const adminWithRolesAndPermissions = {
+        //   ...rest,
+        //   roles,
+        //   permissions,
+        // };
+        const { password: asPass, ...rest } = admin;
+        return done(null, rest as Admin);
       } catch (error) {
         return done(new HttpException(500, 'Internal server error'), null);
       }
@@ -33,12 +55,13 @@ const initializePassport = () => {
   );
 
   passport.serializeUser((user: Admin | User, done) => {
-    done(null, user.id);
+    const { password, ...rest } = user;
+    done(null, rest);
   });
 
-  passport.deserializeUser(async (id: string, done) => {
+  passport.deserializeUser(async (admin: Admin | User, done) => {
     try {
-      const admin = await prisma.admin.findUnique({ where: { id } });
+      // const admin = await prisma.admin.findUnique({ where: { id } });
       if (admin) {
         return done(null, admin);
       }
