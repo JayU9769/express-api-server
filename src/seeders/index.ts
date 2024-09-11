@@ -1,13 +1,7 @@
-import sequelize from "@/models";
 import {number, select} from "@inquirer/prompts";
 
 async function seed() {
   try {
-    await sequelize.authenticate();
-    console.log('Connection has been established successfully.');
-
-    // Sync the models with the database
-    await sequelize.sync();
 
     const entity = await select({
       message: 'What would you like to seed?',
@@ -44,8 +38,6 @@ async function seed() {
     }
   } catch (error) {
     console.error('Unable to connect to the database:', error);
-  } finally {
-    await sequelize.close();
   }
 }
 

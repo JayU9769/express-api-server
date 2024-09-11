@@ -31,6 +31,7 @@ model Admin {
   name      String
   password  String
   status    Int      @default(1)
+  isSystem  Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -49,6 +50,7 @@ model Role {
   name      String   @unique
   type      UserType @default(user)
   status    Int      @default(1)
+  isSystem  Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -62,6 +64,7 @@ model Permission {
   id        String   @id @default(cuid())
   name      String
   type      UserType @default(user)
+  parentId  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

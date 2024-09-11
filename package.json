@@ -9,9 +9,8 @@
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "format": "prettier --write 'src/**/*.{ts,tsx}'",
     "seed": "npm run build && node dist/src/seeders/index.js",
-    "prisma:init": "prisma init",
-    "prisma:migrate": "prisma migrate dev --preview-feature",
-    "prisma:generate": "prisma generate"
+    "migrate": "prisma migrate dev --preview-feature",
+    "generate": "prisma generate"
   },
   "prisma": {
     "schema": "src/prisma/schema.prisma"
@@ -24,7 +23,6 @@
     "@faker-js/faker": "^8.4.1",
     "@inquirer/prompts": "^5.3.8",
     "@prisma/client": "^5.19.1",
-    "@sequelize/mysql": "^7.0.0-alpha.41",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",
@@ -49,8 +47,6 @@
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "reflect-metadata": "^0.2.2",
-    "sequelize": "^6.37.3",
-    "sequelize-typescript": "^2.1.6",
     "tsc-alias": "^1.8.10",
     "tsconfig-paths": "^4.2.0",
     "typedi": "^0.10.0"

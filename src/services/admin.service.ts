@@ -23,7 +23,7 @@ export class AdminService extends BaseService<Admin> {
    * @returns {Promise<User[]>} - A promise that resolves to an array of users.
    */
   public async findAll(): Promise<Admin[]> {
-    return this.prisma.user.findMany();
+    return this.prisma.admin.findMany();
   }
 
   /**
@@ -33,7 +33,7 @@ export class AdminService extends BaseService<Admin> {
    * @throws {HttpException} - Throws an exception if the user does not exist.
    */
   public async findById(userId: string): Promise<Admin> {
-    const findUser: Admin = await this.prisma.user.findUnique({
+    const findUser: Admin = await this.prisma.admin.findUnique({
       where: { id: userId },
     });
     if (!findUser) throw new HttpException(409, "User doesn't exist");
