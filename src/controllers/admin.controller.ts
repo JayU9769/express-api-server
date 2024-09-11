@@ -5,9 +5,20 @@ import { Container } from 'typedi';
 import { AdminService } from '@/services/admin.service';
 import { Admin } from '@prisma/client';
 
+/**
+ * Controller handling admin-related HTTP requests.
+ */
 export class AdminController {
+  // Initialize the AdminService via dependency injection
   public admin = Container.get(AdminService);
 
+  /**
+   * @description Handles admin login functionality using Passport's local strategy.
+   * @param req - Express request object.
+   * @param res - Express response object.
+   * @param next - Express next function to pass control to the next middleware.
+   * @returns A JSON response with a success message and admin data or an error.
+   */
   public login = async (req: Request, res: Response, next: NextFunction) => {
     passport.authenticate('admin-local', (e: Error, admin: Admin) => {
       if (e || !admin) {
@@ -22,6 +33,12 @@ export class AdminController {
     })(req, res, next);
   };
 
+  /**
+   * @description Logs out the currently authenticated admin and clears the session cookie.
+   * @param req - Express request object.
+   * @param res - Express response object.
+   * @returns A JSON response indicating successful logout or an error message.
+   */
   public logout = async (req: Request, res: Response) => {
     req.logout(e => {
       if (e) {
@@ -32,6 +49,13 @@ export class AdminController {
     });
   };
 
+  /**
+   * @description Retrieves the profile of the currently authenticated admin.
+   * @param req - Express request object.
+   * @param res - Express response object.
+   * @param next - Express next function to pass control to the next middleware.
+   * @returns A JSON response with the admins profile data or an error message.
+   */
   public getProfile = async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
       return next(new HttpException(401, 'Not authenticated'));
@@ -39,11 +63,17 @@ export class AdminController {
     return res.status(200).json({ message: 'User Profile', data: req.user });
   };
 
-  // Update profile details
+  /**
+   * @description Updates the profile details of the currently authenticated admin.
+   * @param req - Express request object.
+   * @param res - Express response object.
+   * @param next - Express next function to pass control to the next middleware.
+   * @returns A JSON response with the updated admin data or an error message.
+   */
   public updateProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { name, email } = req.body;
-      const adminId = (req.user as Admin).id; // Now req.user is typed correctly
+      const adminId = (req.user as Admin).id; // Extract the admins ID from req.user
 
       const updatedAdmin = await this.admin.updateProfile(adminId, name, email);
 
@@ -53,17 +83,23 @@ export class AdminController {
     }
   };
 
-  // Update password
+  /**
+   * @description Updates the password of the currently authenticated admin.
+   * @param req - Express request object.
+   * @param res - Express response object.
+   * @param next - Express next function to pass control to the next middleware.
+   * @returns A JSON response indicating successful password update or an error message.
+   */
   public updatePassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { currentPassword, newPassword } = req.body;
-      const adminId = (req.user as Admin).id; // Assuming req.user contains the logged-in admin
+      const adminId = (req.user as Admin).id; // Extract the admins ID from req.user
 
       await this.admin.updatePassword(adminId, currentPassword, newPassword);
 
       res.status(200).json({ message: 'Password updated successfully' });
     } catch (error) {
-      next(error); // Use error middleware for handling errors
+      next(error); // Pass any errors to the error handling middleware
     }
   };
 }
