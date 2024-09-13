@@ -125,9 +125,9 @@ export class AdminService extends BaseService<Admin> {
 
   // Update admin profile
   public async updateProfile(adminId: string, name: string, email: string): Promise<Admin> {
-    return await this.prisma.admin.update({
-      where: { id: adminId },
-      data: { name, email },
+    return this.prisma.admin.update({
+      where: {id: adminId},
+      data: {name, email},
     });
   }
 
