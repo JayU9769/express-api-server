@@ -5,28 +5,41 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import hpp from 'hpp';
 import path from 'path';
-import { CREDENTIALS, NODE_ENV, ORIGIN, PORT } from '@/config';
-import { Routes } from '@/interfaces/route.interface';
-import { ErrorMiddleware } from '@/middlewares/error.middleware';
-import { initializePassport, passport } from '@/config/passport';
-import { initializeSession } from './config/session';
+import {CREDENTIALS, NODE_ENV, ORIGIN, PORT} from '@/config';
+import {Routes} from '@/interfaces/route.interface';
+import {ErrorMiddleware} from '@/middlewares/error.middleware';
+import {passport, PassportService} from '@/config/passport';
+import {SessionService} from '@/config/session';
 
+/**
+ * @class App
+ * @description Main class for setting up and running the Express application.
+ */
 export class App {
   public app: express.Application;
   public env: string;
   public port: string | number;
 
+  /**
+   * @constructor
+   * @param {Routes[]} routes - Array of route objects to initialize.
+   * Initializes the Express application with routes, middleware, and error handling.
+   */
   constructor(routes: Routes[]) {
     this.app = express();
-    this.env = NODE_ENV || 'development';
-    this.port = PORT || 3000;
+    this.env = NODE_ENV || 'development'; // Environment (default to 'development')
+    this.port = PORT || 3000;             // Application port (default to 3000)
 
-    this.initializeMiddlewares();
-    this.initializeRoutes(routes);
-    this.initializeErrorHandling();
-    initializePassport(); // Initialize passport strategies
+    this.initializeMiddlewares();         // Initialize application middlewares
+    this.initializeRoutes(routes);        // Initialize application routes
+    this.initializeErrorHandling();       // Set up error handling middleware
+    PassportService.getInstance();        // Initialize passport strategies
   }
 
+  /**
+   * @method listen
+   * @description Starts the Express application server on the specified port.
+   */
   public async listen() {
     this.app.listen(this.port, () => {
       console.info(`=================================`);
@@ -36,33 +49,60 @@ export class App {
     });
   }
 
+  /**
+   * @method initializeMiddlewares
+   * @description Sets up all middlewares required for the application.
+   * This includes CORS, session handling, Passport initialization, and more.
+   */
   private initializeMiddlewares() {
-    // Apply CORS and cookie parser before sessions
-    this.app.use(cors({ origin: ORIGIN, credentials: CREDENTIALS }));
+    // Enable CORS with specified origin and credentials
+    this.app.use(cors({origin: ORIGIN, credentials: CREDENTIALS}));
+
+    // Parse incoming JSON requests
     this.app.use(express.json());
+
+    // Parse cookies from the request headers
     this.app.use(cookieParser());
 
-    // Initialize session before Passport middlewares
-    this.app.use(initializeSession());
+    // Initialize sessions before Passport
+    this.app.use((new SessionService()).initialize());
 
-    // Passport initialization
-    this.app.use(passport.initialize());
-    this.app.use(passport.session());
 
-    // Other middleware
+    // Initialize Passport for authentication and session management
+    this.app.use(passport.initialize()); // Initialize passport
+    this.app.use(passport.session());    // Attach the session handling for passport
+
+    // Protection against HTTP parameter pollution attacks
     this.app.use(hpp());
+
+    // Enable response compression to reduce payload sizes
     this.app.use(compression());
+
+    // Serve static files from the 'public' directory
     this.app.use(express.static(path.join(__dirname, '..', 'public')));
-    this.app.use(express.urlencoded({ extended: true }));
+
+    // Parse URL-encoded form data
+    this.app.use(express.urlencoded({extended: true}));
   }
 
+  /**
+   * @method initializeRoutes
+   * @param {Routes[]} routes - Array of route objects to initialize.
+   * @description Loops through all route objects and adds them to the Express application.
+   */
   private initializeRoutes(routes: Routes[]) {
     routes.forEach(route => {
+      // Attach each route's router to the base path '/'
       this.app.use('/', route.router);
     });
   }
 
+  /**
+   * @method initializeErrorHandling
+   * @description Initializes the error handling middleware for catching and processing errors.
+   */
   private initializeErrorHandling() {
+    // Use the custom error middleware to handle all application errors
     this.app.use(ErrorMiddleware);
   }
 }

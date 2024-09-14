@@ -6,6 +6,7 @@ import { AdminService } from '@/services/admin.service';
 import { Admin } from '@prisma/client';
 import { IDataTable, IFindAllPaginateOptions } from '@/interfaces/datatable.interface';
 import { IUpdateAction, TSortType } from '@/interfaces/global.interface';
+import * as console from "node:console";
 
 /**
  * Controller handling admin-related HTTP requests.
@@ -28,6 +29,7 @@ export class AdminController {
       }
       req.login(admin, loginErr => {
         if (loginErr) {
+          console.error(loginErr);
           return next(new HttpException(500, 'Login failed'));
         }
         return res.status(200).json({ message: 'Logged in successfully', data: admin });
