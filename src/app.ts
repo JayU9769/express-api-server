@@ -10,6 +10,7 @@ import {Routes} from '@/interfaces/route.interface';
 import {ErrorMiddleware} from '@/middlewares/error.middleware';
 import {passport, PassportService} from '@/config/passport';
 import {SessionService} from '@/config/session';
+import {RedisService} from "@/config/redis";
 
 /**
  * @class App
@@ -33,7 +34,7 @@ export class App {
     this.initializeMiddlewares();         // Initialize application middlewares
     this.initializeRoutes(routes);        // Initialize application routes
     this.initializeErrorHandling();       // Set up error handling middleware
-    PassportService.getInstance();        // Initialize passport strategies
+    this.initializeServices()             // Initialize services
   }
 
   /**
@@ -105,4 +106,26 @@ export class App {
     // Use the custom error middleware to handle all application errors
     this.app.use(ErrorMiddleware);
   }
+
+  /**
+   * Initializes third-party services required by the application.
+   * This method ensures that all necessary services are set up and ready to use.
+   * Specifically, it initializes Redis for caching and session management
+   * and configures Passport for authentication strategies.
+   *
+   * @method initializeServices
+   * @description Initializes the Redis and Passport services.
+   * - `RedisService.getInstance()`: Initializes the Redis service singleton instance.
+   * - `PassportService.getInstance()`: Initializes the Passport service singleton instance.
+   */
+  private initializeServices() {
+    // Initialize the Redis service. The RedisService is a singleton, so this
+    // ensures that only one instance is created and used throughout the application.
+    RedisService.getInstance(); // Initializes Redis service
+
+    // Initialize the Passport service. The PassportService is also a singleton,
+    // ensuring that all Passport strategies and configurations are set up properly.
+    PassportService.getInstance(); // Initializes Passport strategies
+  }
+
 }
