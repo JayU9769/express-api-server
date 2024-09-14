@@ -9,6 +9,7 @@
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "format": "prettier --write 'src/**/*.{ts,tsx}'",
     "seed": "npm run build && node dist/src/seeders/index.js",
+    "setup": "npm run build && node dist/src/seeders/setup.js",
     "migrate": "prisma migrate dev --preview-feature",
     "generate": "prisma generate"
   },
