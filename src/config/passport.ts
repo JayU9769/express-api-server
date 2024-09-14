@@ -100,7 +100,4 @@ export class PassportService {
     });
   }
 }
-
-// Export the singleton instance of PassportService
-export const passportService = PassportService.getInstance();
 export { passport };
