@@ -54,6 +54,7 @@ export class RoleService extends BaseService<Role> {
     if (findRole) throw new HttpException(409, `This role ${data.name} already exists`);
 
     // Create the new role
+    delete data.id
     return this.prisma.role.create({ data });
   }
 

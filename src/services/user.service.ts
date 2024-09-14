@@ -59,6 +59,7 @@ export class UserService extends BaseService<User> {
     const hashedPassword = await hash(data.password, 10);
 
     // Create the user with the hashed password
+    delete data.id
     return this.prisma.user.create({
       data: { ...data, password: hashedPassword },
     });

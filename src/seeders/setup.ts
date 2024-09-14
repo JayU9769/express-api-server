@@ -3,9 +3,8 @@ import {Admin, Permission, PrismaClient, Role} from "@prisma/client";
 class Setup {
   private prisma = new PrismaClient();
 
-  public defaultRoles: Role[] = [
+  public defaultRoles: Omit<Role, "id">[] = [
     {
-      id: '',
       name: 'admin',
       type: 'admin',
       status: 1,
