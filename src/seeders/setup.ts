@@ -93,7 +93,6 @@ class Setup {
 
       await this.prisma.modelHasRole.createMany({
         data: modelHasRole,
-        skipDuplicates: true,
       });
     }
   }

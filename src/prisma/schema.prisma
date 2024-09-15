@@ -20,7 +20,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  modelHasRoles ModelHasRole[]
+  modelHasRoles ModelHasRole[] @relation("userRoles")
 
   @@map("users")
 }
@@ -35,7 +35,7 @@ model Admin {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  modelHasRoles ModelHasRole[]
+  modelHasRoles ModelHasRole[] @relation("adminRoles")
 
   @@map("admins")
 }
@@ -83,8 +83,8 @@ model ModelHasRole {
 
   role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
-  user  User  @relation(fields: [modelId], references: [id], onDelete: Cascade, map: "user")
-  admin Admin @relation(fields: [modelId], references: [id], onDelete: Cascade, map: "admin")
+  user  User?  @relation("userRoles", fields: [modelId], references: [id], onDelete: Cascade, map: "user")
+  admin Admin? @relation("adminRoles", fields: [modelId], references: [id], onDelete: Cascade, map: "admin")
 
   @@map("model_has_roles")
 }
