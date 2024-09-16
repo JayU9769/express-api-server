@@ -20,8 +20,6 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  modelHasRoles ModelHasRole[] @relation("userRoles")
-
   @@map("users")
 }
 
@@ -34,8 +32,6 @@ model Admin {
   isSystem  Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  modelHasRoles ModelHasRole[] @relation("adminRoles")
 
   @@map("admins")
 }
@@ -62,7 +58,7 @@ model Role {
 
 model Permission {
   id        String   @id @default(cuid())
-  name      String
+  name      String   @unique
   type      UserType @default(user)
   parentId  String?
   createdAt DateTime @default(now())
@@ -83,9 +79,7 @@ model ModelHasRole {
 
   role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
-  user  User?  @relation("userRoles", fields: [modelId], references: [id], onDelete: Cascade, map: "user")
-  admin Admin? @relation("adminRoles", fields: [modelId], references: [id], onDelete: Cascade, map: "admin")
-
+  @@unique([roleId, modelId, modelType])
   @@map("model_has_roles")
 }
 
