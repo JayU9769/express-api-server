@@ -1,5 +1,7 @@
 import { Admin, Permission, PrismaClient, Role, ModelHasRole } from "@prisma/client";
 import * as console from "node:console";
+import {hash} from "bcrypt";
+import bcrypt from "bcryptjs";
 
 /**
  * Setup class for initializing default roles, permissions, and admins
@@ -83,9 +85,9 @@ class Setup {
    */
   public defaultAdmins: Omit<Admin, "id">[] = [
     {
-      email: "admin@gmail.com",
+      email: "admin@admin.com",
       name: "Admin",
-      password: this.defaultPassword,
+      password: bcrypt.hashSync(this.defaultPassword),
       status: 1,
       isSystem: 1,
       createdAt: this.timestamp,
