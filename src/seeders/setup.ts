@@ -1,6 +1,4 @@
 import { Admin, Permission, PrismaClient, Role, ModelHasRole } from "@prisma/client";
-import * as console from "node:console";
-import {hash} from "bcrypt";
 import bcrypt from "bcryptjs";
 
 /**
