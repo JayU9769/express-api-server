@@ -1,7 +1,7 @@
 import { Service } from 'typedi';
 import { HttpException } from '@/exceptions/HttpException';
 import { Role } from '@prisma/client';
-import { BaseService } from "@/services/base/base.service";
+import { BaseService } from '@/services/base/base.service';
 
 /**
  * Service class for handling role-related operations.
@@ -9,7 +9,6 @@ import { BaseService } from "@/services/base/base.service";
  */
 @Service()
 export class RoleService extends BaseService<Role> {
-
   /**
    * Constructor initializes the base service with the 'Role' model name.
    */
@@ -17,6 +16,7 @@ export class RoleService extends BaseService<Role> {
     super('Role');
   }
 
+  public query = this.prisma.role;
   /**
    * Retrieves all roles from the database.
    * @returns {Promise<Role[]>} - A promise that resolves to an array of roles.
@@ -54,7 +54,7 @@ export class RoleService extends BaseService<Role> {
     if (findRole) throw new HttpException(409, `This role ${data.name} already exists`);
 
     // Create the new role
-    delete data.id
+    delete data.id;
     return this.prisma.role.create({ data });
   }
 

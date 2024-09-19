@@ -2,7 +2,7 @@ import { hash } from 'bcrypt';
 import { Service } from 'typedi';
 import { HttpException } from '@/exceptions/HttpException';
 import { User } from '@prisma/client';
-import { BaseService } from "@/services/base/base.service";
+import { BaseService } from '@/services/base/base.service';
 
 /**
  * Service class for handling user-related operations.
@@ -10,13 +10,14 @@ import { BaseService } from "@/services/base/base.service";
  */
 @Service()
 export class UserService extends BaseService<User> {
-
   /**
    * Constructor initializes the base service with the 'User' model name.
    */
   constructor() {
     super('User');
   }
+
+  public query = this.prisma.user;
 
   /**
    * Retrieves all users from the database.
@@ -59,7 +60,7 @@ export class UserService extends BaseService<User> {
     const hashedPassword = await hash(data.password, 10);
 
     // Create the user with the hashed password
-    delete data.id
+    delete data.id;
     return this.prisma.user.create({
       data: { ...data, password: hashedPassword },
     });

@@ -18,6 +18,8 @@ export class AdminService extends BaseService<Admin> {
     super('Admin');
   }
 
+  public query = this.prisma.admin;
+
   /**
    * Retrieves all users from the database.
    * @returns {Promise<User[]>} - A promise that resolves to an array of users.
@@ -59,7 +61,7 @@ export class AdminService extends BaseService<Admin> {
     const hashedPassword = await hash(data.password, 10);
 
     // Create the user with the hashed password
-    delete data.id
+    delete data.id;
     return this.prisma.admin.create({
       data: { ...data, password: hashedPassword },
     });
@@ -127,8 +129,8 @@ export class AdminService extends BaseService<Admin> {
   // Update admin profile
   public async updateProfile(adminId: string, name: string, email: string): Promise<Admin> {
     return this.prisma.admin.update({
-      where: {id: adminId},
-      data: {name, email},
+      where: { id: adminId },
+      data: { name, email },
     });
   }
 
