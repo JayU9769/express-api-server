@@ -1,4 +1,3 @@
-import 'reflect-metadata'; // Enables reflection for decorators and metadata management
 import 'tsconfig-paths/register'; // Allows TypeScript path aliases (from tsconfig) to work in Node.js
 import { App } from '@/app'; // Main application class
 import { ValidateEnv } from '@/utils/validateEnv'; // Utility function for validating environment variables
