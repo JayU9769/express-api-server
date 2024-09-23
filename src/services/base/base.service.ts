@@ -1,5 +1,5 @@
 import {IDataTable, IFindAllPaginateOptions} from '@/interfaces/datatable.interface';
-import {IUpdateAction} from '@/interfaces/global.interface';
+import {IUpdateAction, TRecord} from '@/interfaces/global.interface';
 import {PrismaClient, Prisma} from '@prisma/client';
 
 /**
@@ -46,7 +46,7 @@ export abstract class BaseService<T extends object> {
     const {name, value} = field;
 
     // Construct the update data dynamically
-    const updateData: Record<string, any> = {[name]: value};
+    const updateData: TRecord = {[name]: value};
 
     // Where clause to match the records by their IDs
     const whereClause = {id: {in: ids}};
