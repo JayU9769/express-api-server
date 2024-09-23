@@ -1,13 +1,5 @@
-import {
-  IsEmail,
-  IsString,
-  IsNotEmpty,
-  MinLength,
-  MaxLength,
-  IsInt,
-  IsOptional,
-  Min
-} from 'class-validator';
+import { IsEmail, IsString, IsNotEmpty, MinLength, MaxLength, IsInt, IsOptional, Min, Validate } from 'class-validator';
+import { Match } from './match.decorator';
 
 export class LoginAdminDto {
   @IsEmail()
@@ -39,7 +31,6 @@ export class UpdatePasswordDto {
   @MinLength(6, { message: 'Password must be at least 6 characters long' })
   public newPassword: string;
 }
-
 
 /**
  * DTO for creating a new admin.
@@ -86,4 +77,19 @@ export class UpdateAdminDto {
   @IsInt()
   @IsOptional()
   public status?: number;
+}
+
+/**
+ * DTO for updating the password.
+ */
+export class UpdateAdminPasswordDto {
+  @IsString()
+  @IsNotEmpty({ message: 'New password is required' })
+  @MinLength(8, { message: 'Password must be at least 8 characters long' })
+  public newPassword: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'Confirmation password is required' })
+  @Validate(Match, ['newPassword'], { message: 'Passwords do not match' })
+  public confirmNewPassword: string;
 }

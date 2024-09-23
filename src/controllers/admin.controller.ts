@@ -6,7 +6,7 @@ import { AdminService } from '@/services/admin.service';
 import { Admin } from '@prisma/client';
 import { IDataTable, IFindAllPaginateOptions } from '@/interfaces/datatable.interface';
 import { IUpdateAction, TSortType } from '@/interfaces/global.interface';
-import * as console from "node:console";
+import * as console from 'node:console';
 
 /**
  * Controller handling admin-related HTTP requests.
@@ -64,7 +64,7 @@ export class AdminController {
     if (!req.user) {
       return next(new HttpException(401, 'Not authenticated'));
     }
-    return res.status(200).json({ message: 'User Profile', data: req.user });
+    return res.status(200).json({ message: 'Admin Profile', data: req.user });
   };
 
   /**
@@ -77,7 +77,7 @@ export class AdminController {
   public updateProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { name, email } = req.body;
-      const adminId = (req.user as Admin).id; // Extract the admins ID from req.user
+      const adminId = (req.user as Admin).id; // Extract the admins ID from req.admin
 
       const updatedAdmin = await this.admin.updateProfile(adminId, name, email);
 
@@ -97,7 +97,7 @@ export class AdminController {
   public updatePassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { currentPassword, newPassword } = req.body;
-      const adminId = (req.user as Admin).id; // Extract the admins ID from req.user
+      const adminId = (req.user as Admin).id; // Extract the admins ID from req.admin
 
       await this.admin.updatePassword(adminId, currentPassword, newPassword);
 
@@ -108,14 +108,14 @@ export class AdminController {
   };
 
   /**
-   * Retrieves a paginated list of users based on query parameters.
+   * Retrieves a paginated list of admins based on query parameters.
    * Supports pagination, filtering, sorting, and search.
    * @method get
    * @param req Express request object
    * @param res Express response object
    * @param next Express next function for error handling
    */
-  public getUsers = async (req: Request, res: Response, next: NextFunction) => {
+  public getAdmins = async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Destructure query parameters with default values
       const { pageNumber = 0, perPage = 10, sort = 'createdAt', order = 'ASC', ...filters } = req.query;
@@ -131,10 +131,10 @@ export class AdminController {
         order: String(order).toUpperCase() as TSortType,
       };
 
-      // Fetch paginated user data
-      const findAllUsersData: IDataTable<Admin> = await this.admin.findAllPaginate(options);
+      // Fetch paginated admin data
+      const findAllAdminsData: IDataTable<Admin> = await this.admin.findAllPaginate(options);
       // Respond with the fetched data
-      res.status(200).json({ data: findAllUsersData, message: 'findAll' });
+      res.status(200).json({ data: findAllAdminsData, message: 'findAll' });
     } catch (error) {
       // Pass any errors to the next error handling middleware
       next(error);
@@ -142,20 +142,20 @@ export class AdminController {
   };
 
   /**
-   * Retrieves a single user by their ID.
+   * Retrieves a single admin by their ID.
    * @method get
-   * @param req Express request object with user ID in params
+   * @param req Express request object with admin ID in params
    * @param res Express response object
    * @param next Express next function for error handling
    */
-  public getUserById = async (req: Request, res: Response, next: NextFunction) => {
+  public getAdminById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId: string = req.params.id;
-      // Find user by ID
-      const findOneUserData: Admin = await this.admin.findById(userId);
+      const adminId: string = req.params.id;
+      // Find admin by ID
+      const findOneAdminData: Admin = await this.admin.findById(adminId);
 
-      // Respond with the fetched user data
-      res.status(200).json({ data: findOneUserData, message: 'findOne' });
+      // Respond with the fetched admin data
+      res.status(200).json({ data: findOneAdminData, message: 'findOne' });
     } catch (error) {
       // Pass any errors to the next error handling middleware
       next(error);
@@ -163,20 +163,20 @@ export class AdminController {
   };
 
   /**
-   * Creates a new user with provided data.
+   * Creates a new admin with provided data.
    * @method post
-   * @param req Express request object with user data in body
+   * @param req Express request object with admin data in body
    * @param res Express response object
    * @param next Express next function for error handling
    */
-  public createUser = async (req: Request, res: Response, next: NextFunction) => {
+  public createAdmin = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userData: Admin = req.body;
-      // Create new user
-      const createUserData: Admin = await this.admin.create(userData);
+      const adminData: Admin = req.body;
+      // Create new admin
+      const createAdminData: Admin = await this.admin.create(adminData);
 
-      // Respond with the created user data
-      res.status(201).json({ data: createUserData, message: 'created' });
+      // Respond with the created admin data
+      res.status(201).json({ data: createAdminData, message: 'created' });
     } catch (error) {
       // Pass any errors to the next error handling middleware
       next(error);
@@ -184,21 +184,21 @@ export class AdminController {
   };
 
   /**
-   * Updates an existing user with provided data.
+   * Updates an existing admin with provided data.
    * @method put
-   * @param req Express request object with user ID in params and user data in body
+   * @param req Express request object with admin ID in params and admin data in body
    * @param res Express response object
    * @param next Express next function for error handling
    */
-  public updateUser = async (req: Request, res: Response, next: NextFunction) => {
+  public updateAdmin = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId: string = req.params.id;
-      const userData: Admin = req.body;
-      // Update user by ID
-      const updateUserData: Admin = await this.admin.update(userId, userData);
+      const adminId: string = req.params.id;
+      const adminData: Admin = req.body;
+      // Update admin by ID
+      const updateAdminData: Admin = await this.admin.update(adminId, adminData);
 
-      // Respond with the updated user data
-      res.status(200).json({ data: updateUserData, message: 'updated' });
+      // Respond with the updated admin data
+      res.status(200).json({ data: updateAdminData, message: 'updated' });
     } catch (error) {
       // Pass any errors to the next error handling middleware
       next(error);
@@ -206,17 +206,17 @@ export class AdminController {
   };
 
   /**
-   * Deletes a user by their ID.
+   * Deletes a admin by their ID.
    * @method delete
-   * @param req Express request object with user ID in params
+   * @param req Express request object with admin ID in params
    * @param res Express response object
    * @param next Express next function for error handling
    */
-  public deleteUser = async (req: Request, res: Response, next: NextFunction) => {
+  public deleteAdmin = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userIds: string[] = req.body.ids;
-      // Delete user by ID
-      await this.admin.delete(userIds);
+      const adminIds: string[] = req.body.ids;
+      // Delete admin by ID
+      await this.admin.delete(adminIds);
 
       // Respond with success message
       res.status(200).json({ message: 'deleted' });
@@ -227,9 +227,9 @@ export class AdminController {
   };
 
   /**
-   * Single action a users by their ID & Type.
+   * Single action a admins by their ID & Type.
    * @method post
-   * @param req Express request object with user ID in params
+   * @param req Express request object with admin ID in params
    * @param res Express response object
    * @param next Express next function for error handling
    */
@@ -244,6 +244,25 @@ export class AdminController {
     } catch (error) {
       // Pass any errors to the next error handling middleware
       next(error);
+    }
+  };
+
+  public updateAdminPassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { newPassword, confirmNewPassword } = req.body;
+
+      const adminId: string = req.params.id;
+
+      // Check if newPassword and confirmNewPassword match
+      if (newPassword !== confirmNewPassword) {
+        return res.status(422).json({ error: 'New password and confirm password do not match' });
+      }
+
+      await this.admin.updatePasswordWithoutCurrent(adminId, newPassword);
+
+      res.status(200).json({ message: 'Password updated successfully' });
+    } catch (error) {
+      next(error); // Pass any errors to the error handling middleware
     }
   };
 }

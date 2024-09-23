@@ -159,4 +159,24 @@ export class AdminService extends BaseService<Admin> {
       data: { password: hashedPassword },
     });
   }
+
+  public async updatePasswordWithoutCurrent(adminId: string, newPassword: string): Promise<void> {
+    const admin = await this.prisma.admin.findUnique({ where: { id: adminId } });
+
+    if (!admin) {
+      throw new Error('Admin not found');
+    }
+
+    const isNewMatch = await bcrypt.compare(newPassword, admin.password);
+    if (isNewMatch) {
+      throw new Error('New password is already used in the past');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await this.prisma.admin.update({
+      where: { id: adminId },
+      data: { password: hashedPassword },
+    });
+  }
 }
