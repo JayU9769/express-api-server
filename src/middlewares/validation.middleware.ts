@@ -33,7 +33,7 @@ export const ValidationMiddleware = (type: any, skipMissingProperties = false, w
         const message = formattedErrors[0];
 
         // Pass the error message to the next middleware
-        next(new HttpException(400, message));
+        next(new HttpException(422, message));
       } else {
         // Pass other errors directly to the next middleware
         next(errors);

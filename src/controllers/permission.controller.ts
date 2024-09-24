@@ -4,6 +4,7 @@ import {RoleService} from '@/services/role.service';
 import {EUserType, IUpdateAction} from '@/interfaces/global.interface';
 import {Role} from '@prisma/client';
 import {PermissionService} from "@/services/permission.service";
+import {HttpException} from "@/exceptions/HttpException";
 
 /**
  * Controller handling permission-related HTTP requests.
@@ -25,7 +26,7 @@ export class PermissionController {
       const type = req.query.type;
 
       if (!type) {
-        throw new Error('Type is Required');
+        throw new HttpException(422,'Type is Required');
       }
 
       const permissions = await this.permission.findAll(type as EUserType);
