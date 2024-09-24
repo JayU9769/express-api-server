@@ -3,6 +3,7 @@ import { Service } from 'typedi';
 import { HttpException } from '@/exceptions/HttpException';
 import { User } from '@prisma/client';
 import { BaseService } from '@/services/base/base.service';
+import bcrypt from 'bcryptjs';
 
 /**
  * Service class for handling user-related operations.
@@ -129,5 +130,25 @@ export class UserService extends BaseService<User> {
     if (!result.count) throw new HttpException(409, "User doesn't exist");
 
     return true;
+  }
+
+  public async updatePasswordWithoutCurrent(userId: string, newPassword: string): Promise<void> {
+    const admin = await this.prisma.user.findUnique({ where: { id: userId } });
+
+    if (!admin) {
+      throw new Error('Admin not found');
+    }
+
+    const isNewMatch = await bcrypt.compare(newPassword, admin.password);
+    if (isNewMatch) {
+      throw new Error('New password is already used in the past');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
   }
 }
