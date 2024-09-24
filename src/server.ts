@@ -5,7 +5,8 @@ import { ValidateEnv } from '@/utils/validateEnv'; // Utility function for valid
 import { HomeRoute } from '@/routes/home.route'; // Route for the home endpoint
 import { UserRoute } from '@/routes/user.route'; // Route for user-related endpoints
 import { AdminRoute } from '@/routes/admin.route'; // Route for admin-related endpoints
-import { RoleRoute } from '@/routes/role.route'; // Route for role-related endpoints
+import { RoleRoute } from '@/routes/role.route';
+import {PermissionRoute} from "@/routes/permission.route"; // Route for role-related endpoints
 
 // Validate that required environment variables are set
 ValidateEnv();
@@ -17,6 +18,7 @@ ValidateEnv();
 const app = new App([
   new HomeRoute(), // Home-related API routes
   new RoleRoute(), // Role-related API routes
+  new PermissionRoute(), // Permission-related API routes
   new AdminRoute(), // Admin-related API routes
   new UserRoute(), // User-related API routes
 ]);

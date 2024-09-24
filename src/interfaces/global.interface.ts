@@ -4,6 +4,11 @@ export type TSortType = 'ASC' | 'DESC';
 
 export type TRecord = Record<string, any>;
 
+export enum EUserType {
+  ADMIN = 'admin',
+  USER = 'user'
+}
+
 export interface IUpdateAction {
   ids: Array<string>;
   field: {

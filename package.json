@@ -1,7 +1,7 @@
 {
   "name": "express-prisma-mysql-server",
   "version": "1.0.0",
-  "main": "dist/src/server.js",
+  "main": "src/server.ts",
   "scripts": {
     "start": "npm run build && cross-env NODE_ENV=production node dist/src/server.js",
     "build": "swc src -d dist --source-maps --copy-files",
