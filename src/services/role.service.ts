@@ -2,6 +2,7 @@ import { Service } from 'typedi';
 import { HttpException } from '@/exceptions/HttpException';
 import { Role } from '@prisma/client';
 import { BaseService } from '@/services/base/base.service';
+import {EUserType} from "@/interfaces/global.interface";
 
 /**
  * Service class for handling role-related operations.
@@ -21,8 +22,14 @@ export class RoleService extends BaseService<Role> {
    * Retrieves all roles from the database.
    * @returns {Promise<Role[]>} - A promise that resolves to an array of roles.
    */
-  public async findAll(): Promise<Role[]> {
-    return this.prisma.role.findMany();
+  public async findAll(type?: EUserType): Promise<Role[]> {
+    const whereCondition: any = {}
+    if (type) {
+      whereCondition.type = type;
+    }
+    return this.prisma.role.findMany({
+      where: whereCondition
+    });
   }
 
   /**
