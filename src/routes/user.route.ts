@@ -5,6 +5,7 @@ import { Routes } from '@/interfaces/route.interface';
 import { ValidationMiddleware } from '@/middlewares/validation.middleware';
 import { DeleteActionDto, UpdateActionDto } from '@/dtos/global.dto';
 import { isAuthenticated } from '@/middlewares/auth.middleware';
+import { UpdateAdminPasswordDto } from '@/dtos/admin.dto';
 
 /**
  * UserRoute class handles the routing for user-related API endpoints.
@@ -43,5 +44,13 @@ export class UserRoute implements Routes {
 
     // Route to update multiple users using a bulk action, with validation for the action data
     this.router.post(`${this.path}/update-action`, isAuthenticated, ValidationMiddleware(UpdateActionDto), this.user.updateAction);
+
+    // Route to update selected user password
+    this.router.patch(
+      `${this.path}/change-password/:id`,
+      isAuthenticated,
+      ValidationMiddleware(UpdateAdminPasswordDto, false, true),
+      this.user.updateAdminPassword,
+    );
   }
 }

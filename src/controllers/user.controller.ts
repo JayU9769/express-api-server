@@ -3,7 +3,7 @@ import { Container } from 'typedi';
 import { UserService } from '@/services/user.service';
 import { IDataTable, IFindAllPaginateOptions } from '@/interfaces/datatable.interface';
 import { IUpdateAction, TSortType } from '@/interfaces/global.interface';
-import {User} from "@prisma/client";
+import { User } from '@prisma/client';
 
 /**
  * Controller handling user-related HTTP requests.
@@ -22,13 +22,7 @@ export class UserController {
   public getUsers = async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Destructure query parameters with default values
-      const {
-        pageNumber = 0,
-        perPage = 10,
-        sort = 'createdAt',
-        order = 'ASC',
-        ...filters
-      } = req.query;
+      const { pageNumber = 0, perPage = 10, sort = 'createdAt', order = 'ASC', ...filters } = req.query;
 
       // Prepare options for pagination and filtering
       const options: IFindAllPaginateOptions = {
@@ -154,6 +148,25 @@ export class UserController {
     } catch (error) {
       // Pass any errors to the next error handling middleware
       next(error);
+    }
+  };
+
+  public updateAdminPassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { newPassword, confirmNewPassword } = req.body;
+
+      const userId: string = req.params.id;
+
+      // Check if newPassword and confirmNewPassword match
+      if (newPassword !== confirmNewPassword) {
+        return res.status(422).json({ error: 'New password and confirm password do not match' });
+      }
+
+      await this.user.updatePasswordWithoutCurrent(userId, newPassword);
+
+      res.status(200).json({ message: 'Password updated successfully' });
+    } catch (error) {
+      next(error); // Pass any errors to the error handling middleware
     }
   };
 }
