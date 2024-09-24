@@ -25,7 +25,7 @@ export class AdminRoute implements Routes {
     this.router.post(`${this.path}/logout`, isAuthenticated, this.admin.logout);
 
     // Update profile route
-    this.router.put(`${this.path}/profile`, isAuthenticated, ValidationMiddleware(UpdateProfileDto), this.admin.updateProfile);
+    this.router.patch(`${this.path}/profile`, isAuthenticated, ValidationMiddleware(UpdateProfileDto), this.admin.updateProfile);
 
     // Update password route
     this.router.put(`${this.path}/change-password`, isAuthenticated, ValidationMiddleware(UpdatePasswordDto), this.admin.updatePassword);

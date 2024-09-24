@@ -1,6 +1,6 @@
-import {IDataTable, IFindAllPaginateOptions} from '@/interfaces/datatable.interface';
-import {IUpdateAction, TRecord} from '@/interfaces/global.interface';
-import {PrismaClient, Prisma} from '@prisma/client';
+import { IDataTable, IFindAllPaginateOptions } from '@/interfaces/datatable.interface';
+import { IUpdateAction, TRecord } from '@/interfaces/global.interface';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 /**
  * Base service class providing common CRUD operations for any Prisma model.
@@ -20,7 +20,9 @@ export abstract class BaseService<T extends object> {
     // this.prisma = prisma; // Replace `prisma` with your centralized connection if necessary.
 
     // Alternative: Initialize Prisma directly in BaseService (if no centralized connection)
-    this.prisma = new PrismaClient(); // Initializes Prisma client
+    this.prisma = new PrismaClient({
+      log: ['query', 'info', 'warn', 'error'],
+    }); // Initializes Prisma client
     this.model = modelName; // Assigns the model name
   }
 
@@ -30,8 +32,7 @@ export abstract class BaseService<T extends object> {
    */
   protected getModelAttributes(): string[] {
     // Retrieve the model fields from Prisma's data model
-    return Prisma.dmmf.datamodel.models
-      .find(model => model.name === this.model)?.fields.map(field => field.name) || [];
+    return Prisma.dmmf.datamodel.models.find(model => model.name === this.model)?.fields.map(field => field.name) || [];
   }
 
   /**
@@ -41,15 +42,15 @@ export abstract class BaseService<T extends object> {
    * @throws {Error} - Throws an error if the update operation fails.
    */
   public async updateAction(
-    {ids, field}: IUpdateAction, // Field object with name and value
+    { ids, field }: IUpdateAction, // Field object with name and value
   ): Promise<number> {
-    const {name, value} = field;
+    const { name, value } = field;
 
     // Construct the update data dynamically
-    const updateData: TRecord = {[name]: value};
+    const updateData: TRecord = { [name]: value };
 
     // Where clause to match the records by their IDs
-    const whereClause = {id: {in: ids}};
+    const whereClause = { id: { in: ids } };
 
     try {
       // Perform the update action on the records
@@ -71,17 +72,15 @@ export abstract class BaseService<T extends object> {
    * @param {IFindAllPaginateOptions} options - Options for pagination, filtering, sorting, and global search.
    * @returns {Promise<IDataTable<T>>} - A promise that resolves to a paginated table containing rows and count.
    */
-  public async findAllPaginate(
-    {
-      pageNumber = 1,
-      perPage = 10,
-      filters = {},
-      q,
-      ignoreGlobal = [],
-      sort = 'createdAt',
-      order = 'ASC',
-    }: IFindAllPaginateOptions = {}
-  ): Promise<IDataTable<T>> {
+  public async findAllPaginate({
+    pageNumber = 1,
+    perPage = 10,
+    filters = {},
+    q,
+    ignoreGlobal = [],
+    sort = 'createdAt',
+    order = 'ASC',
+  }: IFindAllPaginateOptions = {}): Promise<IDataTable<T>> {
     // Calculate the offset (skip) for pagination
     const skip = (pageNumber - 1) * perPage;
 
@@ -99,7 +98,7 @@ export abstract class BaseService<T extends object> {
     });
 
     // Count the total number of records that match the filters
-    const count = await this.prisma[this.model].count({where});
+    const count = await this.prisma[this.model].count({ where });
 
     // Return the paginated data and the total count
     return {

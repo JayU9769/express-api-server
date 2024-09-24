@@ -78,10 +78,12 @@ export class AdminController {
     try {
       const { name, email } = req.body;
       const adminId = (req.user as Admin).id; // Extract the admins ID from req.admin
-
       const updatedAdmin = await this.admin.updateProfile(adminId, name, email);
 
-      res.status(200).json({ message: 'Profile updated successfully', data: updatedAdmin });
+      res.status(200).json({
+        message: 'Profile updated successfully',
+        data: updatedAdmin,
+      });
     } catch (error) {
       next(error);
     }
@@ -100,6 +102,8 @@ export class AdminController {
       const adminId = (req.user as Admin).id; // Extract the admins ID from req.admin
 
       await this.admin.updatePassword(adminId, currentPassword, newPassword);
+
+      res.clearCookie('connect.sid'); // Clear session cookie
 
       res.status(200).json({ message: 'Password updated successfully' });
     } catch (error) {
