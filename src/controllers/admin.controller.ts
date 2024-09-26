@@ -77,12 +77,18 @@ export class AdminController {
   public updateProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { name, email } = req.body;
-      const adminId = (req.user as Admin).id; // Extract the admins ID from req.admin
-      const updatedAdmin = await this.admin.updateProfile(adminId, name, email);
+      const admin = req.user as Admin; // Extract the admins ID from req.admin
+      const updatedAdmin = await this.admin.updateProfile(admin.id, name, email);
+      let logout = false;
+      if (admin.email !== email) {
+        logout = true;
+        res.clearCookie('connect.sid');
+      }
 
       res.status(200).json({
         message: 'Profile updated successfully',
         data: updatedAdmin,
+        isSessionUpdate: logout,
       });
     } catch (error) {
       next(error);
