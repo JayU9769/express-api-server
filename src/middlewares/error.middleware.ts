@@ -6,7 +6,7 @@ export const ErrorMiddleware = (error: HttpException, req: Request, res: Respons
     const status: number = error.status || 500;
     const message: string = error.message || 'Something went wrong';
 
-    res.status(status).json({ message });
+    res.status(status).json({ message, status });
   } catch (error) {
     next(error);
   }
