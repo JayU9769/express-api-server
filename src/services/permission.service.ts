@@ -1,8 +1,9 @@
 import {Service} from 'typedi';
 import {HttpException} from '@/exceptions/HttpException';
-import {Permission, RoleHasPermission} from '@prisma/client';
+import {Permission, Prisma, RoleHasPermission} from '@prisma/client';
 import {BaseService} from '@/services/base/base.service';
 import {EUserType} from "@/interfaces/global.interface";
+import {IUpdatePermission} from "@/interfaces/permission.interface";
 
 /**
  * Service class for handling permission-related operations.
@@ -36,6 +37,42 @@ export class PermissionService extends BaseService<Permission> {
   public async findAllRoleHasPermissions(): Promise<RoleHasPermission[]> {
     return this.prisma.roleHasPermission.findMany();
   }
+
+  public async updatePermission(data: IUpdatePermission) {
+    const {role, value, permission} = data;
+
+    // Find all permissions, including child permissions if no parentId
+    const permissions = permission.parentId
+      ? [permission]
+      : await this.prisma.permission.findMany({where: {parentId: permission.id}});
+
+    // Prepare role-permission relationships
+    const rolesWithPermissions: RoleHasPermission[] = permissions.map(p => ({
+      roleId: role.id,
+      permissionId: p.id,
+    }));
+
+    // Early return if there are no permissions to process
+    if (rolesWithPermissions.length === 0) return;
+
+    // Conditional operation: create or delete based on value
+    value
+      ?
+      await this.prisma.roleHasPermission.createMany({
+        data: rolesWithPermissions,
+        skipDuplicates: true,
+      })
+      :
+      await this.prisma.roleHasPermission.deleteMany({
+        where: {
+          OR: rolesWithPermissions.map(({roleId, permissionId}) => ({
+            roleId,
+            permissionId,
+          })),
+        },
+      });
+  }
+
 
   /**
    * Finds a permission by its unique ID.
