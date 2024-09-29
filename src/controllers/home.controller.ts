@@ -37,6 +37,31 @@ export class HomeController {
   };
 
   /**
+   * @description Handles search value API.
+   * @param req - Express request object.
+   * @param res - Express response object.
+   * @param next - Express next function to pass control to the next middleware.
+   * @returns A JSON response with a success message and admin data or an error.
+   */
+  public searchValue = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { type, value } = req.query;
+
+      if (!type) {
+        return res.status(400).json({ message: 'Type is required', data: [] });
+      }
+
+      const searchValue = await this.getSearchValue(type as string, value as string);
+
+      const message = searchValue ? `${(type as string)?.charAt(0).toUpperCase() + (type as string)?.slice(1)} Found` : 'Not Found';
+
+      return res.status(200).json({ data: searchValue, message });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
    * Retrieves search results based on type and search term.
    * @param type - The type of data to search for (roles or users).
    * @param searchTerm - The search keyword in lowercase.
@@ -86,4 +111,17 @@ export class HomeController {
       label: item[text], // Dynamically maps the `text` key
     }));
   }
+
+  private getSearchValue = async (type: string, value: string) => {
+    let item = {};
+    switch (type) {
+      case 'roles':
+        const { id, name } = await this.roleService.findById(value);
+        item = { id, name };
+        break;
+      default:
+    }
+
+    return item;
+  };
 }

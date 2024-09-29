@@ -19,5 +19,6 @@ export class HomeRoute implements Routes {
     });
 
     this.router.get(`${this.path}search-list`, isAuthenticated, this.home.searchList);
+    this.router.get(`${this.path}search-value`, isAuthenticated, this.home.searchValue);
   }
 }
