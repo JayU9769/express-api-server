@@ -82,8 +82,8 @@ export class HomeController {
    */
   private mapList(items: any[], { id, text }: { id: string; text: string }) {
     return items.map(item => ({
-      id: item[id],
-      text: item[text], // Dynamically maps the `text` key
+      value: item[id],
+      label: item[text], // Dynamically maps the `text` key
     }));
   }
 }
