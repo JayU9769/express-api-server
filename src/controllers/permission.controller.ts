@@ -56,7 +56,7 @@ export class PermissionController {
       await this.permission.updatePermission(body);
 
       // Respond with success message
-      res.status(200).json({message: 'Updated Bulk Action'});
+      res.status(200).json({message: 'Permission updated'});
     } catch (error) {
       // Pass any errors to the next error handling middleware
       next(error);
