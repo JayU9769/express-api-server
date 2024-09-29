@@ -116,12 +116,22 @@ export class HomeController {
     let item = {};
     switch (type) {
       case 'roles':
-        const { id, name } = await this.roleService.findById(value);
-        item = { id, name };
+        item = await this.roleService.findById(value);
+        return this.mapValue(item, { id: 'id', text: 'name' });
         break;
+      case 'users':
+        item = await this.userService.findById(value);
+        return this.mapValue(item, { id: 'id', text: 'name' });
       default:
     }
 
-    return item;
+    return {};
   };
+
+  private mapValue(item: any, { id, text }: { id: string; text: string }) {
+    return {
+      value: item[id],
+      label: item[text], // Dynamically maps the `text` key
+    };
+  }
 }
