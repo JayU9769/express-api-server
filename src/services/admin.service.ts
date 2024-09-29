@@ -55,6 +55,7 @@ export class AdminService extends BaseService<Admin> {
     const findUser: Admin = await this.prisma.admin.findUnique({
       where: { email: data.email },
     });
+
     if (findUser) throw new HttpException(409, `This email ${data.email} already exists`);
 
     // Hash the user's password
@@ -62,9 +63,10 @@ export class AdminService extends BaseService<Admin> {
 
     // Create the user with the hashed password
     delete data.id;
-    return this.prisma.admin.create({
+    const admin = await this.prisma.admin.create({
       data: { ...data, password: hashedPassword },
     });
+    return admin;
   }
   /**
    * Updates an existing user by their ID with the provided data.
@@ -100,7 +102,7 @@ export class AdminService extends BaseService<Admin> {
     }
 
     // Update the user with new data
-    return this.prisma.admin.update({
+    return await this.prisma.admin.update({
       where: { id: userId },
       data: data,
     });
@@ -129,8 +131,8 @@ export class AdminService extends BaseService<Admin> {
   // Update admin profile
   public async updateProfile(adminId: string, name: string, email: string): Promise<Admin> {
     return this.prisma.admin.update({
-      where: {id: adminId},
-      data: {name, email},
+      where: { id: adminId },
+      data: { name, email },
     });
   }
 

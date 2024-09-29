@@ -1,4 +1,4 @@
-import { IsEmail, IsString, IsNotEmpty, MinLength, MaxLength, IsInt, IsOptional, Min, Validate } from 'class-validator';
+import { IsEmail, IsString, IsNotEmpty, MinLength, MaxLength, IsInt, IsOptional, Min, Validate, IsArray } from 'class-validator';
 import { Match } from './match.decorator';
 
 export class LoginAdminDto {
@@ -54,6 +54,10 @@ export class CreateAdminDto {
   @IsOptional()
   @Min(0, { message: 'Status must be 0 or 1' })
   public status?: number;
+
+  @IsArray()
+  @IsNotEmpty({ each: true })
+  public roles?: Array<string>;
 }
 
 /**
@@ -77,6 +81,10 @@ export class UpdateAdminDto {
   @IsInt()
   @IsOptional()
   public status?: number;
+
+  @IsArray()
+  @IsNotEmpty({ each: true })
+  public roles?: Array<string>;
 }
 
 /**

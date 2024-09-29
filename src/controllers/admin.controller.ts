@@ -7,6 +7,7 @@ import { Admin } from '@prisma/client';
 import { IDataTable, IFindAllPaginateOptions } from '@/interfaces/datatable.interface';
 import { IUpdateAction, TSortType } from '@/interfaces/global.interface';
 import * as console from 'node:console';
+import RolePermissionService from '@/role-permissions/RolePermissionService';
 
 /**
  * Controller handling admin-related HTTP requests.
@@ -14,6 +15,7 @@ import * as console from 'node:console';
 export class AdminController {
   // Initialize the AdminService via dependency injection
   public admin = Container.get(AdminService);
+  public rolePermissionService = Container.get(RolePermissionService);
 
   /**
    * @description Handles admin login functionality using Passport's local strategy.
@@ -87,7 +89,7 @@ export class AdminController {
       req.user = admin;
 
       // Save the updated session
-      req.session.save((err) => {
+      req.session.save(err => {
         if (err) {
           return next(err);
         }
@@ -95,7 +97,7 @@ export class AdminController {
 
       res.status(200).json({
         message: 'Profile updated successfully',
-        data: updatedAdmin
+        data: updatedAdmin,
       });
     } catch (error) {
       next(error);
@@ -172,7 +174,7 @@ export class AdminController {
       const findOneAdminData: Admin = await this.admin.findById(adminId);
 
       // Respond with the fetched admin data
-      res.status(200).json({ data: findOneAdminData, message: 'findOne' });
+      res.status(200).json({ data: { ...findOneAdminData, roles: [] }, message: 'findOne' });
     } catch (error) {
       // Pass any errors to the next error handling middleware
       next(error);
@@ -188,9 +190,14 @@ export class AdminController {
    */
   public createAdmin = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const adminData: Admin = req.body;
+      const { roles, ...rest } = req.body;
+      const adminData: Admin = rest;
       // Create new admin
       const createAdminData: Admin = await this.admin.create(adminData);
+
+      if (roles.length > 0) {
+        this.rolePermissionService.syncRoles(createAdminData.id, roles, 'admin');
+      }
 
       // Respond with the created admin data
       res.status(201).json({ data: createAdminData, message: 'created' });
@@ -210,9 +217,14 @@ export class AdminController {
   public updateAdmin = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const adminId: string = req.params.id;
-      const adminData: Admin = req.body;
-      // Update admin by ID
+      const { roles, ...rest } = req.body;
+      const adminData: Admin = rest;
+      // // Update admin by ID
       const updateAdminData: Admin = await this.admin.update(adminId, adminData);
+
+      if (roles.length > 0) {
+        this.rolePermissionService.syncRoles(adminId, roles, 'admin');
+      }
 
       // Respond with the updated admin data
       res.status(200).json({ data: updateAdminData, message: 'updated' });
