@@ -173,8 +173,10 @@ export class AdminController {
       // Find admin by ID
       const findOneAdminData: Admin = await this.admin.findById(adminId);
 
+      const roles = await this.rolePermissionService.getRoles(adminId, 'admin');
+
       // Respond with the fetched admin data
-      res.status(200).json({ data: { ...findOneAdminData, roles: [] }, message: 'findOne' });
+      res.status(200).json({ data: { ...findOneAdminData, roles: roles.map(role => role.id) }, message: 'findOne' });
     } catch (error) {
       // Pass any errors to the next error handling middleware
       next(error);

@@ -193,6 +193,39 @@ class RolePermissionService {
     return permissions.includes(permissionName);
   }
 
+  async getRoles(modelId: string, modelType: UserType): Promise<{ id: string; name: string }[]> {
+    const cacheKey = `${modelType}_roles_${modelId}`;
+
+    // Check if the roles are cached
+    const cachedRoles = rolePermissionCache.get<{ id: string; name: string }[]>(cacheKey);
+
+    if (cachedRoles) {
+      return cachedRoles;
+    }
+
+    // Fetch the roles from the database
+    const roles = await prisma.modelHasRole.findMany({
+      where: {
+        modelId,
+        modelType,
+      },
+      include: {
+        role: true, // Include the role details
+      },
+    });
+
+    // Extract role ids and names
+    const roleData = roles.map(r => ({
+      id: r.role.id,
+      name: r.role.name,
+    }));
+
+    // Cache the role data for future use
+    rolePermissionCache.set(cacheKey, roleData);
+
+    return roleData;
+  }
+
   /**
    * Invalidate cache when roles/permissions are updated.
    */
