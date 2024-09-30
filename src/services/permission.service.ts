@@ -1,9 +1,10 @@
-import {Service} from 'typedi';
-import {HttpException} from '@/exceptions/HttpException';
-import {Permission, Prisma, RoleHasPermission} from '@prisma/client';
-import {BaseService} from '@/services/base/base.service';
-import {EUserType} from "@/interfaces/global.interface";
-import {IUpdatePermission} from "@/interfaces/permission.interface";
+import { Service } from 'typedi';
+import { HttpException } from '@/exceptions/HttpException';
+import { Permission, Prisma, RoleHasPermission } from '@prisma/client';
+import { BaseService } from '@/services/base/base.service';
+import { EUserType, TRecord } from '@/interfaces/global.interface';
+import { IUpdatePermission } from '@/interfaces/permission.interface';
+import { RedisService } from '@/config/redis';
 
 /**
  * Service class for handling permission-related operations.
@@ -11,66 +12,127 @@ import {IUpdatePermission} from "@/interfaces/permission.interface";
  */
 @Service()
 export class PermissionService extends BaseService<Permission> {
+
+  // Singleton instance of Redis service for caching purposes
+  private redis = RedisService.getInstance();
+
   /**
    * Constructor initializes the base service with the 'Permission' model name.
    */
   constructor() {
-    super('Permission');
+    super('Permission'); // Passes the model name to the base service
   }
 
+  // Prisma query to interact with the permission table
   public query = this.prisma.permission;
 
   /**
-   * Retrieves all permissions from the database.
+   * Retrieves all permissions from the database, optionally filtered by user type.
+   * @param {EUserType} [type] - Optional type filter for permissions.
    * @returns {Promise<Permission[]>} - A promise that resolves to an array of permissions.
    */
   public async findAll(type?: EUserType): Promise<Permission[]> {
-    const whereCondition: any = {}
+    const whereCondition: any = {};
     if (type) {
-      whereCondition.type = type;
+      whereCondition.type = type; // Add type condition if specified
     }
     return this.prisma.permission.findMany({
-      where: whereCondition
+      where: whereCondition,
     });
   }
 
+  /**
+   * Retrieves all role-permission relationships from the database.
+   * @returns {Promise<RoleHasPermission[]>} - A promise that resolves to an array of role-permission relationships.
+   */
   public async findAllRoleHasPermissions(): Promise<RoleHasPermission[]> {
     return this.prisma.roleHasPermission.findMany();
   }
 
+  /**
+   * Updates role permissions based on provided data. Adds or removes role-permission relationships.
+   * @param {IUpdatePermission} data - Data containing role, permission, and action (add/remove).
+   */
   public async updatePermission(data: IUpdatePermission) {
-    const {role, value, permission} = data;
+    const { role, value, permission } = data;
 
-    // Find all permissions, including child permissions if no parentId
+    const tempRole = await this.prisma.role.findUnique({ where: { id: role.id, isSystem: 1 } })
+
+    if (tempRole) throw new HttpException(422, "Can not change permissions of System roles");
+
+    // If the permission has no parentId, find its child permissions
     const permissions = permission.parentId
       ? [permission]
-      : await this.prisma.permission.findMany({where: {parentId: permission.id}});
+      : await this.prisma.permission.findMany({ where: { parentId: permission.id } });
 
-    // Prepare role-permission relationships
+    // Map permissions to create role-permission relationships
     const rolesWithPermissions: RoleHasPermission[] = permissions.map(p => ({
       roleId: role.id,
       permissionId: p.id,
     }));
 
-    // Early return if there are no permissions to process
+    // If there are no permissions, exit early
     if (rolesWithPermissions.length === 0) return;
 
-    // Conditional operation: create or delete based on value
+    // If value is true, add role-permission relationships, otherwise delete them
     value
-      ?
-      await this.prisma.roleHasPermission.createMany({
+      ? await this.prisma.roleHasPermission.createMany({
         data: rolesWithPermissions,
         skipDuplicates: true,
       })
-      :
-      await this.prisma.roleHasPermission.deleteMany({
+      : await this.prisma.roleHasPermission.deleteMany({
         where: {
-          OR: rolesWithPermissions.map(({roleId, permissionId}) => ({
+          OR: rolesWithPermissions.map(({ roleId, permissionId }) => ({
             roleId,
             permissionId,
           })),
         },
       });
+
+    // Refresh cached permissions
+    this.getPermissions(true);
+  }
+
+  /**
+   * Retrieves permissions from the database, grouped by role type and role name.
+   * If cached data exists, it returns the cached data unless the `forceUpdate` flag is set to true.
+   *
+   * @param {boolean} forceUpdate - Optional flag to force cache update. If true, data will be fetched from the database and the cache will be updated.
+   * @returns {Promise<TRecord>} - A promise that resolves to a record of permissions grouped by role type and role name.
+   */
+  public async getPermissions(forceUpdate: boolean = false): Promise<TRecord> {
+    // Check if the permissions are cached and return from cache if not forced to update
+    const cachedPermissions = await this.redis.get('permissions');
+    if (cachedPermissions && !forceUpdate) {
+      return JSON.parse(cachedPermissions) as TRecord;
+    }
+
+    // Fetch permissions from the database
+    const permissions: TRecord = {};
+    const rolesWithPermissions = await this.prisma.role.findMany({
+      include: {
+        roleHasPermissions: {
+          include: {
+            permission: true, // Include permission details in the role-permission relationship
+          },
+        },
+      },
+    });
+
+    // Group permissions by role type and role name
+    if (rolesWithPermissions.length > 0) {
+      rolesWithPermissions.forEach(role => {
+        if (!permissions[role.type]) {
+          permissions[role.type] = {};
+        }
+        permissions[role.type][role.name] = role.roleHasPermissions.map(rhp => rhp.permission.name);
+      });
+
+      // Cache the new permissions data in Redis
+      await this.redis.set('permissions', JSON.stringify(permissions));
+    }
+
+    return permissions;
   }
 
 
@@ -82,7 +144,7 @@ export class PermissionService extends BaseService<Permission> {
    */
   public async findById(permissionId: string): Promise<Permission> {
     const findPermission: Permission = await this.prisma.permission.findUnique({
-      where: {id: permissionId},
+      where: { id: permissionId },
     });
     if (!findPermission) throw new HttpException(409, "Permission doesn't exist");
 
@@ -96,15 +158,15 @@ export class PermissionService extends BaseService<Permission> {
    * @throws {HttpException} - Throws an exception if the permission name already exists.
    */
   public async create(data: Permission): Promise<Permission> {
-    // Check if the permission already exists by name
+    // Check if a permission with the same name already exists
     const findPermission: Permission = await this.prisma.permission.findUnique({
-      where: {name: data.name},
+      where: { name: data.name },
     });
     if (findPermission) throw new HttpException(409, `This permission ${data.name} already exists`);
 
-    // Create the new permission
+    // Remove ID field and create a new permission
     delete data.id;
-    return this.prisma.permission.create({data});
+    return this.prisma.permission.create({ data });
   }
 
   /**
@@ -119,29 +181,29 @@ export class PermissionService extends BaseService<Permission> {
   public async update(permissionId: string, data: Permission): Promise<Permission> {
     // Find the permission by ID to ensure the permission exists
     const findPermission: Permission | null = await this.prisma.permission.findUnique({
-      where: {id: permissionId},
+      where: { id: permissionId },
     });
 
-    // Throw an error if unable to find permission with permissionId
+    // Throw an error if the permission is not found
     if (!findPermission) {
       throw new HttpException(404, `Permission with ID ${permissionId} not found`);
     }
 
-    // Check if another permission exists with the same name but a different ID
+    // Check if another permission with the same name exists
     if (data.name && data.name.toLowerCase() !== findPermission.name.toLowerCase()) {
       const existingPermissionWithName: Permission | null = await this.prisma.permission.findUnique({
-        where: {name: data.name},
+        where: { name: data.name },
       });
 
-      // Throw an error if an existing permission with the same name is found
+      // Throw an error if a permission with the same name exists
       if (existingPermissionWithName) {
         throw new HttpException(409, `Permission name ${data.name} is already in use by another permission`);
       }
     }
 
-    // Update the permission with new data
+    // Update the permission with the new data
     return this.prisma.permission.update({
-      where: {id: permissionId},
+      where: { id: permissionId },
       data: data,
     });
   }
@@ -153,10 +215,10 @@ export class PermissionService extends BaseService<Permission> {
    * @throws {HttpException} - Throws an exception if no permissions were deleted.
    */
   public async delete(permissionIds: string[]): Promise<boolean> {
-    // Attempt to delete permissions with the provided IDs
+    // Delete permissions by their IDs
     const result = await this.prisma.permission.deleteMany({
       where: {
-        id: {in: permissionIds},
+        id: { in: permissionIds },
       },
     });
 

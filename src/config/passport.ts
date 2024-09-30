@@ -1,8 +1,9 @@
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import bcrypt from 'bcryptjs';
-import { Admin, PrismaClient, User } from '@prisma/client';
+import {Admin, PrismaClient, User, UserType} from '@prisma/client';
 import { HttpException } from '@/exceptions/HttpException';
+import {IAuthUser} from "@/interfaces/global.interface";
 
 const prisma = new PrismaClient();
 
@@ -40,20 +41,7 @@ export class PassportService {
       new LocalStrategy({ usernameField: 'email' }, async (email: string, password: string, done: (err: any, user?: Admin, info?: any) => void) => {
         try {
           const admin = await prisma.admin.findUnique({
-            where: { email },
-            // include: {
-            //   modelHasRoles: {
-            //     include: {
-            //       role: {
-            //         include: {
-            //           roleHasPermissions: {
-            //             include: { permission: true },
-            //           },
-            //         },
-            //       },
-            //     },
-            //   },
-            // },
+            where: { email }
           });
           if (!admin) {
             return done(new HttpException(401, 'No admin with that email'), null);
@@ -68,20 +56,52 @@ export class PassportService {
             return done(new HttpException(401, 'Provided password is invalid'), null);
           }
 
-          const { password: _, ...rest } = admin;
-          return done(null, rest as Admin);
+          const roles = await prisma.modelHasRole.findMany({
+            where: {
+              modelId: admin.id,
+              modelType: UserType.admin
+            },
+            include: {
+              role: {
+                include: {
+                  roleHasPermissions: {
+                    include: {
+                      permission: true, // Including the permission object
+                    },
+                  },
+                },
+              },
+            },
+          })
+
+          const userRoles: string[] = [];
+          const permissions = roles.flatMap(userRole => {
+            userRoles.push(userRole.role.name);
+            return userRole.role.roleHasPermissions.map(rp => rp.permission.name);
+          });
+
+          const {
+            password: _,
+            ...rest
+          } = admin;
+
+          return done(null, {
+            ...rest,
+            roles: userRoles,
+            permissions
+          } as IAuthUser);
         } catch (error) {
           return done(new HttpException(500, 'Internal server error'), null);
         }
       }),
     );
 
-    passport.serializeUser((user: Admin | User, done) => {
+    passport.serializeUser((user: IAuthUser, done) => {
       const { password, ...rest } = user;
       done(null, rest);
     });
 
-    passport.deserializeUser(async (admin: Admin | User, done) => {
+    passport.deserializeUser(async (admin: IAuthUser, done) => {
       try {
         // const admin = await prisma.admin.findUnique({ where: { id } });
         if (admin) {

@@ -25,3 +25,9 @@ declare global {
     }
   }
 }
+
+
+export interface IAuthUser extends Admin, User {
+  roles: Array<string>;
+  permissions: Array<string>;
+}

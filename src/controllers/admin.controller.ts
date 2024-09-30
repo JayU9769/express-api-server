@@ -3,11 +3,12 @@ import { HttpException } from '@/exceptions/HttpException';
 import { passport } from '@/config/passport';
 import { Container } from 'typedi';
 import { AdminService } from '@/services/admin.service';
-import { Admin } from '@prisma/client';
+import {Admin, UserType} from '@prisma/client';
 import { IDataTable, IFindAllPaginateOptions } from '@/interfaces/datatable.interface';
-import { IUpdateAction, TSortType } from '@/interfaces/global.interface';
+import {IAuthUser, IUpdateAction, TSortType} from '@/interfaces/global.interface';
 import * as console from 'node:console';
 import RolePermissionService from '@/role-permissions/RolePermissionService';
+import {PermissionService} from "@/services/permission.service";
 
 /**
  * Controller handling admin-related HTTP requests.
@@ -16,6 +17,7 @@ export class AdminController {
   // Initialize the AdminService via dependency injection
   public admin = Container.get(AdminService);
   public rolePermissionService = Container.get(RolePermissionService);
+  public permissionService = Container.get(PermissionService);
 
   /**
    * @description Handles admin login functionality using Passport's local strategy.
@@ -31,7 +33,6 @@ export class AdminController {
       }
       req.login(admin, loginErr => {
         if (loginErr) {
-          console.error(loginErr);
           return next(new HttpException(500, 'Login failed'));
         }
         return res.status(200).json({ message: 'Logged in successfully', data: admin });
@@ -66,6 +67,25 @@ export class AdminController {
     if (!req.user) {
       return next(new HttpException(401, 'Not authenticated'));
     }
+
+    const admin = req.user as IAuthUser;
+    const permission = await this.permissionService.getPermissions();
+
+    const mergedPermissions = admin.roles.reduce((acc, role) => {
+      const permissions = permission[UserType.admin][role] || []; // Get permissions for the role or an empty array
+      return [...acc, ...permissions]; // Merge permissions into accumulator
+    }, [] as string[]);
+
+    // Remove duplicates using Set and return the result as an array
+    (req.user as IAuthUser).permissions = [...new Set(mergedPermissions)];
+
+    // Save the updated session
+    req.session.save(err => {
+      if (err) {
+        return next(err);
+      }
+    });
+
     return res.status(200).json({ message: 'Admin Profile', data: req.user });
   };
 
@@ -79,7 +99,7 @@ export class AdminController {
   public updateProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { name, email } = req.body;
-      const admin = req.user as Admin; // Extract the admins ID from req.admin
+      const admin = req.user as IAuthUser; // Extract the admins ID from req.admin
       const updatedAdmin = await this.admin.updateProfile(admin.id, name, email);
 
       // Update the session with the new profile data
