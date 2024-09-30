@@ -8,7 +8,7 @@ import { HttpException } from "@/exceptions/HttpException";
  * @param {string} requiredPermission - The name of the permission to check.
  * @returns {Function} - Express middleware function.
  */
-function checkPermission(requiredPermission: string) {
+const checkPermission = (requiredPermission: string) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const user = req.user as IAuthUser;
 

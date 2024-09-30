@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import RolePermissionService from './RolePermissionService';
 import { Admin, User } from '@prisma/client';
+import { IAuthUser } from '@/interfaces/global.interface';
 
 const rolePermissionService = new RolePermissionService();
 
@@ -9,7 +10,7 @@ const rolePermissionService = new RolePermissionService();
  */
 export function requireRole(roleName: string) {
   return async (req: Request, res: Response, next: NextFunction) => {
-    const user = req.user as Admin | User; // Assuming req.user has user information
+    const user = req.user as IAuthUser; // Assuming req.user has user information
     if (!user) {
       return res.status(401).json({ message: 'Unauthorized' });
     }

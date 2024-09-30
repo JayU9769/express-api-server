@@ -4,6 +4,7 @@ import { UserService } from '@/services/user.service';
 import { IDataTable, IFindAllPaginateOptions } from '@/interfaces/datatable.interface';
 import { IUpdateAction, TSortType } from '@/interfaces/global.interface';
 import { User } from '@prisma/client';
+import { HttpException } from '@/exceptions/HttpException';
 
 /**
  * Controller handling user-related HTTP requests.
@@ -159,7 +160,7 @@ export class UserController {
 
       // Check if newPassword and confirmNewPassword match
       if (newPassword !== confirmNewPassword) {
-        return res.status(422).json({ error: 'New password and confirm password do not match' });
+        throw new HttpException(422, 'New password and confirm password do not match');
       }
 
       await this.user.updatePasswordWithoutCurrent(userId, newPassword);
