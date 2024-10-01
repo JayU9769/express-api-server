@@ -6,6 +6,7 @@ import { ValidationMiddleware } from '@/middlewares/validation.middleware';
 import { DeleteActionDto, UpdateActionDto } from '@/dtos/global.dto';
 import { isAuthenticated } from '@/middlewares/auth.middleware';
 import { UpdateAdminPasswordDto } from '@/dtos/admin.dto';
+import checkPermission from '@/middlewares/checkPermission.middleware';
 
 /**
  * UserRoute class handles the routing for user-related API endpoints.
@@ -28,22 +29,22 @@ export class UserRoute implements Routes {
    */
   private initializeRoutes() {
     // Route to get all users with optional pagination, sorting, and filtering
-    this.router.get(`${this.path}`, isAuthenticated, this.user.getUsers);
+    this.router.get(`${this.path}`, isAuthenticated, checkPermission('user-view'), this.user.getUsers);
 
     // Route to get a specific user by their ID
-    this.router.get(`${this.path}/:id`, isAuthenticated, this.user.getUserById);
+    this.router.get(`${this.path}/:id`, isAuthenticated, checkPermission('user-view'), this.user.getUserById);
 
     // Route to create a new user, with validation for the incoming data
-    this.router.post(`${this.path}`, isAuthenticated, ValidationMiddleware(CreateUserDto), this.user.createUser);
+    this.router.post(`${this.path}`, isAuthenticated, checkPermission('user-create'), ValidationMiddleware(CreateUserDto), this.user.createUser);
 
     // Route to update an existing user by their ID, with validation for the incoming data
-    this.router.put(`${this.path}/:id`, isAuthenticated, ValidationMiddleware(UpdateUserDto, false, true), this.user.updateUser);
+    this.router.put(`${this.path}/:id`, isAuthenticated, checkPermission('user-update'), ValidationMiddleware(UpdateUserDto, false, true), this.user.updateUser);
 
     // Route to delete one or more users by their IDs, with validation for the incoming IDs
-    this.router.delete(`${this.path}`, isAuthenticated, ValidationMiddleware(DeleteActionDto), this.user.deleteUser);
+    this.router.delete(`${this.path}`, isAuthenticated, checkPermission('user-delete'), ValidationMiddleware(DeleteActionDto), this.user.deleteUser);
 
     // Route to update multiple users using a bulk action, with validation for the action data
-    this.router.post(`${this.path}/update-action`, isAuthenticated, ValidationMiddleware(UpdateActionDto), this.user.updateAction);
+    this.router.post(`${this.path}/update-action`, isAuthenticated, checkPermission('user-update'), ValidationMiddleware(UpdateActionDto), this.user.updateAction);
 
     // Route to update selected user password
     this.router.patch(

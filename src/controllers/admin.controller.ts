@@ -71,10 +71,10 @@ export class AdminController {
     const admin = req.user as IAuthUser;
     const permission = await this.permissionService.getPermissions();
 
-    const mergedPermissions = admin.roles.reduce((acc, role) => {
+    const mergedPermissions: string[] = admin.roles.reduce((acc, role) => {
       const permissions = permission[UserType.admin][role] || []; // Get permissions for the role or an empty array
       return [...acc, ...permissions]; // Merge permissions into accumulator
-    }, [] as string[]);
+    }, []);
 
     // Remove duplicates using Set and return the result as an array
     (req.user as IAuthUser).permissions = [...new Set(mergedPermissions)];

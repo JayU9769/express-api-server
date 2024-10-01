@@ -4,6 +4,7 @@ import { isAuthenticated } from '@/middlewares/auth.middleware';
 import {PermissionController} from "@/controllers/permission.controller";
 import {ValidationMiddleware} from "@/middlewares/validation.middleware";
 import {UpdatePermissionRequestDto} from "@/dtos/permission.dto";
+import checkPermission from '@/middlewares/checkPermission.middleware';
 
 /**
  * PermissionRoute class handles the routing for permission-related API endpoints.
@@ -26,7 +27,7 @@ export class PermissionRoute implements Routes {
    */
   private initializeRoutes() {
     // Route to get all permissions with optional pagination, sorting, and filtering
-    this.router.get(`${this.path}`, isAuthenticated, this.permission.getPermissions);
-    this.router.post(`${this.path}/update-permission`, isAuthenticated, ValidationMiddleware(UpdatePermissionRequestDto), this.permission.updatePermission);
+    this.router.get(`${this.path}`, isAuthenticated, checkPermission('admin-permission'), this.permission.getPermissions);
+    this.router.post(`${this.path}/update-permission`, isAuthenticated, checkPermission('admin-permission'), ValidationMiddleware(UpdatePermissionRequestDto), this.permission.updatePermission);
   }
 }
