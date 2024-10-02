@@ -6,7 +6,7 @@ import { HomeRoute } from '@/routes/home.route'; // Route for the home endpoint
 import { UserRoute } from '@/routes/user.route'; // Route for user-related endpoints
 import { AdminRoute } from '@/routes/admin.route'; // Route for admin-related endpoints
 import { RoleRoute } from '@/routes/role.route';
-import {PermissionRoute} from "@/routes/permission.route"; // Route for role-related endpoints
+import { PermissionRoute } from '@/routes/permission.route'; // Route for role-related endpoints
 
 // Validate that required environment variables are set
 ValidateEnv();

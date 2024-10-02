@@ -1,12 +1,11 @@
 import { faker } from '@faker-js/faker';
 import { PrismaClient } from '@prisma/client';
-import bcrypt from "bcryptjs";
+import bcrypt from 'bcryptjs';
 
 export async function seed(count: number) {
   const prisma = new PrismaClient();
   const users = [];
   const status = [0, 1];
-
 
   // Generate a salt
   const salt = await bcrypt.genSalt(10);

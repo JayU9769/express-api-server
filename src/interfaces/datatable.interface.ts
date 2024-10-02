@@ -1,4 +1,3 @@
-import { Includeable } from 'sequelize';
 import { TRecord, TSortType } from './global.interface';
 
 export interface IDataTable<T> {
@@ -14,5 +13,5 @@ export interface IFindAllPaginateOptions {
   ignoreGlobal?: string[];
   sort?: string;
   order?: TSortType;
-  include?: Includeable[];
+  include?: any;
 }

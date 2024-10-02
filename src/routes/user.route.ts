@@ -38,13 +38,25 @@ export class UserRoute implements Routes {
     this.router.post(`${this.path}`, isAuthenticated, checkPermission('user-create'), ValidationMiddleware(CreateUserDto), this.user.createUser);
 
     // Route to update an existing user by their ID, with validation for the incoming data
-    this.router.put(`${this.path}/:id`, isAuthenticated, checkPermission('user-update'), ValidationMiddleware(UpdateUserDto, false, true), this.user.updateUser);
+    this.router.put(
+      `${this.path}/:id`,
+      isAuthenticated,
+      checkPermission('user-update'),
+      ValidationMiddleware(UpdateUserDto, false, true),
+      this.user.updateUser,
+    );
 
     // Route to delete one or more users by their IDs, with validation for the incoming IDs
     this.router.delete(`${this.path}`, isAuthenticated, checkPermission('user-delete'), ValidationMiddleware(DeleteActionDto), this.user.deleteUser);
 
     // Route to update multiple users using a bulk action, with validation for the action data
-    this.router.post(`${this.path}/update-action`, isAuthenticated, checkPermission('user-update'), ValidationMiddleware(UpdateActionDto), this.user.updateAction);
+    this.router.post(
+      `${this.path}/update-action`,
+      isAuthenticated,
+      checkPermission('user-update'),
+      ValidationMiddleware(UpdateActionDto),
+      this.user.updateAction,
+    );
 
     // Route to update selected user password
     this.router.patch(

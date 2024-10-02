@@ -23,7 +23,6 @@ export class SessionService {
    * @returns A promise that resolves to the session middleware configuration.
    */
   initialize() {
-
     // Return the configured session middleware
     return session({
       store: new RedisStore({

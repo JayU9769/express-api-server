@@ -12,7 +12,6 @@ import { RedisService } from '@/config/redis';
  */
 @Service()
 export class PermissionService extends BaseService<Permission> {
-
   // Singleton instance of Redis service for caching purposes
   private redis = RedisService.getInstance();
 
@@ -56,14 +55,12 @@ export class PermissionService extends BaseService<Permission> {
   public async updatePermission(data: IUpdatePermission) {
     const { role, value, permission } = data;
 
-    const tempRole = await this.prisma.role.findUnique({ where: { id: role.id, isSystem: 1 } })
+    const tempRole = await this.prisma.role.findUnique({ where: { id: role.id, isSystem: 1 } });
 
-    if (tempRole) throw new HttpException(422, "Can not change permissions of System roles");
+    if (tempRole) throw new HttpException(422, 'Can not change permissions of System roles');
 
     // If the permission has no parentId, find its child permissions
-    const permissions = permission.parentId
-      ? [permission]
-      : await this.prisma.permission.findMany({ where: { parentId: permission.id } });
+    const permissions = permission.parentId ? [permission] : await this.prisma.permission.findMany({ where: { parentId: permission.id } });
 
     // Map permissions to create role-permission relationships
     const rolesWithPermissions: RoleHasPermission[] = permissions.map(p => ({
@@ -77,17 +74,17 @@ export class PermissionService extends BaseService<Permission> {
     // If value is true, add role-permission relationships, otherwise delete them
     value
       ? await this.prisma.roleHasPermission.createMany({
-        data: rolesWithPermissions,
-        skipDuplicates: true,
-      })
+          data: rolesWithPermissions,
+          skipDuplicates: true,
+        })
       : await this.prisma.roleHasPermission.deleteMany({
-        where: {
-          OR: rolesWithPermissions.map(({ roleId, permissionId }) => ({
-            roleId,
-            permissionId,
-          })),
-        },
-      });
+          where: {
+            OR: rolesWithPermissions.map(({ roleId, permissionId }) => ({
+              roleId,
+              permissionId,
+            })),
+          },
+        });
 
     // Refresh cached permissions
     this.getPermissions(true);
@@ -134,7 +131,6 @@ export class PermissionService extends BaseService<Permission> {
 
     return permissions;
   }
-
 
   /**
    * Finds a permission by its unique ID.

@@ -1,5 +1,4 @@
-import {Permission, Role} from "@prisma/client";
-
+import { Permission, Role } from '@prisma/client';
 
 export interface IUpdatePermission {
   value: number;

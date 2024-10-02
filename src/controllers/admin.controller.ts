@@ -3,12 +3,12 @@ import { HttpException } from '@/exceptions/HttpException';
 import { passport } from '@/config/passport';
 import { Container } from 'typedi';
 import { AdminService } from '@/services/admin.service';
-import {Admin, UserType} from '@prisma/client';
+import { Admin, UserType } from '@prisma/client';
 import { IDataTable, IFindAllPaginateOptions } from '@/interfaces/datatable.interface';
-import {IAuthUser, IUpdateAction, TSortType} from '@/interfaces/global.interface';
+import { IAuthUser, IUpdateAction, TSortType } from '@/interfaces/global.interface';
 import * as console from 'node:console';
 import RolePermissionService from '@/role-permissions/RolePermissionService';
-import {PermissionService} from "@/services/permission.service";
+import { PermissionService } from '@/services/permission.service';
 
 /**
  * Controller handling admin-related HTTP requests.

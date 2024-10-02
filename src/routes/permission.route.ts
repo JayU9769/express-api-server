@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { Routes } from '@/interfaces/route.interface';
 import { isAuthenticated } from '@/middlewares/auth.middleware';
-import {PermissionController} from "@/controllers/permission.controller";
-import {ValidationMiddleware} from "@/middlewares/validation.middleware";
-import {UpdatePermissionRequestDto} from "@/dtos/permission.dto";
+import { PermissionController } from '@/controllers/permission.controller';
+import { ValidationMiddleware } from '@/middlewares/validation.middleware';
+import { UpdatePermissionRequestDto } from '@/dtos/permission.dto';
 import checkPermission from '@/middlewares/checkPermission.middleware';
 
 /**
@@ -28,6 +28,12 @@ export class PermissionRoute implements Routes {
   private initializeRoutes() {
     // Route to get all permissions with optional pagination, sorting, and filtering
     this.router.get(`${this.path}`, isAuthenticated, checkPermission('admin-permission'), this.permission.getPermissions);
-    this.router.post(`${this.path}/update-permission`, isAuthenticated, checkPermission('admin-permission'), ValidationMiddleware(UpdatePermissionRequestDto), this.permission.updatePermission);
+    this.router.post(
+      `${this.path}/update-permission`,
+      isAuthenticated,
+      checkPermission('admin-permission'),
+      ValidationMiddleware(UpdatePermissionRequestDto),
+      this.permission.updatePermission,
+    );
   }
 }

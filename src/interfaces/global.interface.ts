@@ -6,7 +6,7 @@ export type TRecord = Record<string, any>;
 
 export enum EUserType {
   ADMIN = 'admin',
-  USER = 'user'
+  USER = 'user',
 }
 
 export interface IUpdateAction {
@@ -25,7 +25,6 @@ declare global {
     }
   }
 }
-
 
 export interface IAuthUser extends Admin, User {
   roles: Array<string>;

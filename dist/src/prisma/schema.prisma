@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  phoneNo   String
+  password  String
+  status    Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  status    Int      @default(1)
+  isSystem  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admins")
+}
+
+enum UserType {
+  admin
+  user
+}
+
+model Role {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  type      UserType @default(user)
+  status    Int      @default(1)
+  isSystem  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  modelHasRoles      ModelHasRole[]
+  roleHasPermissions RoleHasPermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  type      UserType @default(user)
+  parentId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  roleHasPermissions RoleHasPermission[]
+
+  @@map("permissions")
+}
+
+model ModelHasRole {
+  id        String   @id @default(cuid())
+  roleId    String
+  modelId   String
+  modelType UserType @default(user)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, modelId, modelType])
+  @@map("model_has_roles")
+}
+
+model RoleHasPermission {
+  roleId       String
+  permissionId String
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId]) // Composite primary key
+  @@map("role_has_permissions")
+}

@@ -1,9 +1,9 @@
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import bcrypt from 'bcryptjs';
-import {Admin, PrismaClient, User, UserType} from '@prisma/client';
+import { Admin, PrismaClient, User, UserType } from '@prisma/client';
 import { HttpException } from '@/exceptions/HttpException';
-import {IAuthUser} from "@/interfaces/global.interface";
+import { IAuthUser } from '@/interfaces/global.interface';
 
 const prisma = new PrismaClient();
 
@@ -41,7 +41,7 @@ export class PassportService {
       new LocalStrategy({ usernameField: 'email' }, async (email: string, password: string, done: (err: any, user?: Admin, info?: any) => void) => {
         try {
           const admin = await prisma.admin.findUnique({
-            where: { email }
+            where: { email },
           });
           if (!admin) {
             return done(new HttpException(401, 'No admin with that email'), null);
@@ -59,7 +59,7 @@ export class PassportService {
           const roles = await prisma.modelHasRole.findMany({
             where: {
               modelId: admin.id,
-              modelType: UserType.admin
+              modelType: UserType.admin,
             },
             include: {
               role: {
@@ -72,7 +72,7 @@ export class PassportService {
                 },
               },
             },
-          })
+          });
 
           const userRoles: string[] = [];
           const permissions = roles.flatMap(userRole => {
@@ -80,15 +80,12 @@ export class PassportService {
             return userRole.role.roleHasPermissions.map(rp => rp.permission.name);
           });
 
-          const {
-            password: _,
-            ...rest
-          } = admin;
+          const { password: _, ...rest } = admin;
 
           return done(null, {
             ...rest,
             roles: userRoles,
-            permissions
+            permissions,
           } as IAuthUser);
         } catch (error) {
           return done(new HttpException(500, 'Internal server error'), null);

@@ -1,5 +1,5 @@
-import { Admin, Permission, PrismaClient, Role, ModelHasRole, UserType } from "@prisma/client";
-import bcrypt from "bcryptjs";
+import { Admin, Permission, PrismaClient, Role, ModelHasRole, UserType } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 /**
  * The Setup class initializes the default roles, permissions, and admin accounts
@@ -17,7 +17,7 @@ class Setup {
   /**
    * List of default roles to be created. Excludes 'id' since it will be auto-generated.
    */
-  public defaultRoles: Omit<Role, "id">[] = [
+  public defaultRoles: Omit<Role, 'id'>[] = [
     {
       name: 'admin',
       type: 'admin',
@@ -35,7 +35,7 @@ class Setup {
    * List of default permissions to be created. Includes dynamic CRUD permissions
    * (create, view, update, delete) for role, admin, and user.
    */
-  public defaultPermissions: Omit<Permission, "id">[] = [
+  public defaultPermissions: Omit<Permission, 'id'>[] = [
     {
       name: 'role',
       type: 'admin',
@@ -65,15 +65,16 @@ class Setup {
       updatedAt: this.timestamp,
     },
     // Generate CRUD permissions for 'role', 'admin', and 'user'
-    ...['create', 'view', 'update', 'delete'].flatMap(action => (
-      ['role', 'admin', 'user'].map(parent => ({
-        name: `${parent}-${action}`,
-        type: 'admin',
-        parentId: parent,
-        createdAt: this.timestamp,
-        updatedAt: this.timestamp,
-      })) as Omit<Permission, "id">[]
-    )),
+    ...['create', 'view', 'update', 'delete'].flatMap(
+      action =>
+        ['role', 'admin', 'user'].map(parent => ({
+          name: `${parent}-${action}`,
+          type: 'admin',
+          parentId: parent,
+          createdAt: this.timestamp,
+          updatedAt: this.timestamp,
+        })) as Omit<Permission, 'id'>[],
+    ),
     {
       name: 'admin-permission',
       type: 'admin',
@@ -87,10 +88,10 @@ class Setup {
    * List of default admin users to be created. Excludes 'id' since it will be auto-generated.
    * Passwords are hashed using bcrypt.
    */
-  public defaultAdmins: Omit<Admin, "id">[] = [
+  public defaultAdmins: Omit<Admin, 'id'>[] = [
     {
-      email: "admin@admin.com",
-      name: "Admin",
+      email: 'admin@admin.com',
+      name: 'Admin',
       password: bcrypt.hashSync(this.defaultPassword),
       status: 1,
       isSystem: 1,
@@ -104,17 +105,13 @@ class Setup {
    * and assigning roles to admins.
    */
   async init() {
-    console.info("Setup Started...");
+    console.info('Setup Started...');
     // Run the insert operations in parallel for efficiency
-    await Promise.all([
-      this.insertRoles(),
-      this.insertAdmins(),
-      this.insertPermissions(),
-    ]);
+    await Promise.all([this.insertRoles(), this.insertAdmins(), this.insertPermissions()]);
     // Assign permissions to the role and role to admins
     this.assignPermissionsToRole();
     await this.assignRoleToAdmin();
-    console.info("Setup Complete...");
+    console.info('Setup Complete...');
   }
 
   /**
@@ -122,7 +119,7 @@ class Setup {
    * based on role name.
    */
   private async insertRoles() {
-    console.info("Inserting Roles...");
+    console.info('Inserting Roles...');
     await this.prisma.role.createMany({
       data: this.defaultRoles,
       skipDuplicates: true,
@@ -135,7 +132,7 @@ class Setup {
    * and then links child permissions to their parent using parentId.
    */
   private async insertPermissions() {
-    console.info("Inserting Permissions...");
+    console.info('Inserting Permissions...');
 
     // Separate parent and child permissions
     const parentPermissions = this.defaultPermissions.filter(p => !p.parentId);
@@ -173,7 +170,7 @@ class Setup {
    * based on the email field.
    */
   private async insertAdmins() {
-    console.info("Inserting Admins...");
+    console.info('Inserting Admins...');
     await this.prisma.admin.createMany({
       data: this.defaultAdmins,
       skipDuplicates: true,
@@ -185,7 +182,7 @@ class Setup {
    * the 'admin' role in the `ModelHasRole` table.
    */
   private async assignRoleToAdmin() {
-    console.info("Assigning roles to admins...");
+    console.info('Assigning roles to admins...');
     // Fetch both admin users and roles to create role assignments
     const [admins, roles] = await Promise.all([
       this.prisma.admin.findMany({
@@ -204,14 +201,14 @@ class Setup {
 
     if (admins.length && roles.length) {
       // Create the role assignments for each admin
-      const modelHasRole: Omit<ModelHasRole, "id">[] = admins.flatMap(admin =>
+      const modelHasRole: Omit<ModelHasRole, 'id'>[] = admins.flatMap(admin =>
         roles.map(role => ({
           roleId: role.id,
           modelType: 'admin',
           modelId: admin.id,
           createdAt: this.timestamp,
           updatedAt: this.timestamp,
-        }))
+        })),
       );
 
       // Insert the role assignments into the `ModelHasRole` table
@@ -227,7 +224,7 @@ class Setup {
    * to the appropriate admin role in the `RoleHasPermission` table.
    */
   private async assignPermissionsToRole() {
-    console.info("Assigning permissions to roles...");
+    console.info('Assigning permissions to roles...');
     // Fetch all admin system roles
     const roles = await this.prisma.role.findMany({
       where: {
@@ -247,10 +244,12 @@ class Setup {
     });
 
     // Assign permissions to roles
-    const roleHasPermissions = roles.flatMap(role => permissions.map(permission => ({
-      roleId: role.id,
-      permissionId: permission.id,
-    })));
+    const roleHasPermissions = roles.flatMap(role =>
+      permissions.map(permission => ({
+        roleId: role.id,
+        permissionId: permission.id,
+      })),
+    );
 
     // Insert the role-permission assignments into the `RoleHasPermission` table
     await this.prisma.roleHasPermission.createMany({

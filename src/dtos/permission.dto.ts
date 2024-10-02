@@ -1,6 +1,5 @@
-import {IsNumber, ValidateNested, IsObject, IsString} from 'class-validator';
+import { IsNumber, ValidateNested, IsObject, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
-
 
 // Define Role DTO for validation
 class RoleDTO {

@@ -5,7 +5,7 @@ import { CreateAdminDto, LoginAdminDto, UpdateAdminDto, UpdateAdminPasswordDto, 
 import { AdminController } from '@/controllers/admin.controller';
 import { isAuthenticated } from '@/middlewares/auth.middleware';
 import { DeleteActionDto, UpdateActionDto } from '@/dtos/global.dto';
-import checkPermission from "@/middlewares/checkPermission.middleware";
+import checkPermission from '@/middlewares/checkPermission.middleware';
 
 export class AdminRoute implements Routes {
   public path = '/admins';
@@ -41,13 +41,31 @@ export class AdminRoute implements Routes {
     this.router.post(`${this.path}`, isAuthenticated, checkPermission('admin-create'), ValidationMiddleware(CreateAdminDto), this.admin.createAdmin);
 
     // Route to update an existing user by their ID, with validation for the incoming data
-    this.router.put(`${this.path}/:id`, isAuthenticated, checkPermission('admin-update'), ValidationMiddleware(UpdateAdminDto, false, true), this.admin.updateAdmin);
+    this.router.put(
+      `${this.path}/:id`,
+      isAuthenticated,
+      checkPermission('admin-update'),
+      ValidationMiddleware(UpdateAdminDto, false, true),
+      this.admin.updateAdmin,
+    );
 
     // Route to delete one or more users by their IDs, with validation for the incoming IDs
-    this.router.delete(`${this.path}`, isAuthenticated, checkPermission('admin-delete'), ValidationMiddleware(DeleteActionDto), this.admin.deleteAdmin);
+    this.router.delete(
+      `${this.path}`,
+      isAuthenticated,
+      checkPermission('admin-delete'),
+      ValidationMiddleware(DeleteActionDto),
+      this.admin.deleteAdmin,
+    );
 
     // Route to update multiple users using a bulk action, with validation for the action data
-    this.router.post(`${this.path}/update-action`, isAuthenticated, checkPermission('admin-update'), ValidationMiddleware(UpdateActionDto), this.admin.updateAction);
+    this.router.post(
+      `${this.path}/update-action`,
+      isAuthenticated,
+      checkPermission('admin-update'),
+      ValidationMiddleware(UpdateActionDto),
+      this.admin.updateAction,
+    );
 
     // Route to update selected user password
     this.router.patch(

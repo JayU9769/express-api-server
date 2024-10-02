@@ -17,11 +17,12 @@ export class RedisService {
       url: REDIS_URL, // Adjust the URL based on your Redis server configuration
     });
 
-    this.client.connect()
+    this.client
+      .connect()
       .then(() => {
         console.log('Redis client connected');
       })
-      .catch((err) => {
+      .catch(err => {
         console.error('Redis error:', err);
       });
   }

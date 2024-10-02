@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from "express";
-import { IAuthUser } from "@/interfaces/global.interface";
-import { HttpException } from "@/exceptions/HttpException";
+import { Request, Response, NextFunction } from 'express';
+import { IAuthUser } from '@/interfaces/global.interface';
+import { HttpException } from '@/exceptions/HttpException';
 
 /**
  * Middleware to check if the user has the required permission.
@@ -15,12 +15,12 @@ const checkPermission = (requiredPermission: string) => {
     // Check if the user is authenticated and has permissions
     if (!user) {
       // User not authenticated
-      return next(new HttpException(401, "User not authenticated."));
+      return next(new HttpException(401, 'User not authenticated.'));
     }
 
     if (!user.permissions || !Array.isArray(user.permissions)) {
       // User has no permissions or permissions are not properly formatted
-      return next(new HttpException(403, "Access denied. No permissions found."));
+      return next(new HttpException(403, 'Access denied. No permissions found.'));
     }
 
     // Check if the required permission exists in the user's permissions
@@ -34,6 +34,6 @@ const checkPermission = (requiredPermission: string) => {
     // Permission not found, deny access
     return next(new HttpException(403, `Access denied. You do not have the required permission: ${requiredPermission}`));
   };
-}
+};
 
 export default checkPermission;

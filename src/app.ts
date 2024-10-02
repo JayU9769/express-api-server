@@ -5,12 +5,12 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import hpp from 'hpp';
 import path from 'path';
-import {CREDENTIALS, NODE_ENV, ORIGIN, PORT} from '@/config';
-import {Routes} from '@/interfaces/route.interface';
-import {ErrorMiddleware} from '@/middlewares/error.middleware';
-import {passport, PassportService} from '@/config/passport';
-import {SessionService} from '@/config/session';
-import {RedisService} from "@/config/redis";
+import { CREDENTIALS, NODE_ENV, ORIGIN, PORT } from '@/config';
+import { Routes } from '@/interfaces/route.interface';
+import { ErrorMiddleware } from '@/middlewares/error.middleware';
+import { passport, PassportService } from '@/config/passport';
+import { SessionService } from '@/config/session';
+import { RedisService } from '@/config/redis';
 
 /**
  * @class App
@@ -29,12 +29,12 @@ export class App {
   constructor(routes: Routes[]) {
     this.app = express();
     this.env = NODE_ENV || 'development'; // Environment (default to 'development')
-    this.port = PORT || 3000;             // Application port (default to 3000)
+    this.port = PORT || 3000; // Application port (default to 3000)
 
-    this.initializeMiddlewares();         // Initialize application middlewares
-    this.initializeRoutes(routes);        // Initialize application routes
-    this.initializeErrorHandling();       // Set up error handling middleware
-    this.initializeServices()             // Initialize services
+    this.initializeMiddlewares(); // Initialize application middlewares
+    this.initializeRoutes(routes); // Initialize application routes
+    this.initializeErrorHandling(); // Set up error handling middleware
+    this.initializeServices(); // Initialize services
   }
 
   /**
@@ -57,7 +57,7 @@ export class App {
    */
   private initializeMiddlewares() {
     // Enable CORS with specified origin and credentials
-    this.app.use(cors({origin: ORIGIN, credentials: CREDENTIALS}));
+    this.app.use(cors({ origin: ORIGIN, credentials: CREDENTIALS }));
 
     // Parse incoming JSON requests
     this.app.use(express.json());
@@ -66,12 +66,11 @@ export class App {
     this.app.use(cookieParser());
 
     // Initialize sessions before Passport
-    this.app.use((new SessionService()).initialize());
-
+    this.app.use(new SessionService().initialize());
 
     // Initialize Passport for authentication and session management
     this.app.use(passport.initialize()); // Initialize passport
-    this.app.use(passport.session());    // Attach the session handling for passport
+    this.app.use(passport.session()); // Attach the session handling for passport
 
     // Protection against HTTP parameter pollution attacks
     this.app.use(hpp());
@@ -83,7 +82,7 @@ export class App {
     this.app.use(express.static(path.join(__dirname, '..', 'public')));
 
     // Parse URL-encoded form data
-    this.app.use(express.urlencoded({extended: true}));
+    this.app.use(express.urlencoded({ extended: true }));
   }
 
   /**
@@ -127,5 +126,4 @@ export class App {
     // ensuring that all Passport strategies and configurations are set up properly.
     PassportService.getInstance(); // Initializes Passport strategies
   }
-
 }

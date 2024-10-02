@@ -37,12 +37,24 @@ export class RoleRoute implements Routes {
     this.router.post(`${this.path}`, isAuthenticated, checkPermission('role-create'), ValidationMiddleware(CreateRoleDto), this.role.createRole);
 
     // Route to update an existing role by its ID, with validation for the incoming data
-    this.router.put(`${this.path}/:id`, isAuthenticated, checkPermission('role-update'), ValidationMiddleware(UpdateRoleDto, false, true), this.role.updateRole);
+    this.router.put(
+      `${this.path}/:id`,
+      isAuthenticated,
+      checkPermission('role-update'),
+      ValidationMiddleware(UpdateRoleDto, false, true),
+      this.role.updateRole,
+    );
 
     // Route to delete one or more roles by their IDs, with validation for the incoming IDs
     this.router.delete(`${this.path}`, isAuthenticated, checkPermission('role-delete'), ValidationMiddleware(DeleteActionDto), this.role.deleteRole);
 
     // Route to update multiple roles using a bulk action, with validation for the action data
-    this.router.post(`${this.path}/update-action`, isAuthenticated, checkPermission('role-update'), ValidationMiddleware(UpdateActionDto), this.role.updateAction);
+    this.router.post(
+      `${this.path}/update-action`,
+      isAuthenticated,
+      checkPermission('role-update'),
+      ValidationMiddleware(UpdateActionDto),
+      this.role.updateAction,
+    );
   }
 }
