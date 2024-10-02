@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "main": "src/server.ts",
   "scripts": {
-    "start": "npm run build && cross-env NODE_ENV=production netlify dev",
-    "build": "swc src -d dist --source-maps --copy-files && netlify-lambda build src",
+    "start": "npm run build && cross-env NODE_ENV=production node dist/src/server.js",
+    "build": "swc src -d dist --source-maps --copy-files",
     "dev": "cross-env NODE_ENV=development nodemon",
-    "serve": "netlify-lambda serve src",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "format": "prettier --write 'src/**/*.{ts,tsx}'",
     "seed": "npm run build && node dist/src/seeders/index.js",
