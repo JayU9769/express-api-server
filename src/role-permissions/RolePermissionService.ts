@@ -15,7 +15,7 @@ class RolePermissionService {
   /**
    * Synchronize roles for a given modelId with the provided array of roles.
    * @param modelId The ID of the model to synchronize roles for.
-   * @param roles Array of role names to synchronize.
+   * @param roleIds
    * @param modelType The type of the model (UserType).
    */
   async syncRoles(modelId: string, roleIds: string[], modelType: UserType) {

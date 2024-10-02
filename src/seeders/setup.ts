@@ -57,6 +57,13 @@ class Setup {
       createdAt: this.timestamp,
       updatedAt: this.timestamp,
     },
+    {
+      name: 'admin-dashboard',
+      type: 'admin',
+      parentId: 'admin',
+      createdAt: this.timestamp,
+      updatedAt: this.timestamp,
+    },
     // Generate CRUD permissions for 'role', 'admin', and 'user'
     ...['create', 'view', 'update', 'delete'].flatMap(action => (
       ['role', 'admin', 'user'].map(parent => ({
