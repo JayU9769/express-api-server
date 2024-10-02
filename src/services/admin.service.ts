@@ -119,6 +119,7 @@ export class AdminService extends BaseService<Admin> {
     const result = await this.prisma.admin.deleteMany({
       where: {
         id: { in: userIds },
+        isSystem: 0,
       },
     });
 
